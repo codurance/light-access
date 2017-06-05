@@ -71,6 +71,51 @@ public class ThrowablesShould {
         throwables.execute(command, TestException::new);
     }
 
+    @Test
+    public void executeQuery() throws Exception {
+        throwables.executeQuery(query);
+
+        verify(query).call();
+    }
+
+    @Test
+    public void throwsRuntimeExceptionThrownByQuery() throws Exception {
+        doThrow(new RuntimeException("I throw runtimeException")).when(query).call();
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage(is("I throw runtimeException"));
+
+        throwables.executeQuery(query);
+    }
+
+    @Test
+    public void wrapsCheckedExceptionThrownByQueryWithRuntimeException() throws Exception {
+        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
+        doThrow(exceptionThrownByCommand).when(query).call();
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectCause(is(exceptionThrownByCommand));
+
+        throwables.executeQuery(query);
+    }
+
+    @Test
+    public void throwsRuntimeExceptionThrownByQueryWithoutWrapping() throws Exception {
+        doThrow(new RuntimeException("I throw runtimeException")).when(query).call();
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage(is("I throw runtimeException"));
+
+        throwables.executeQuery(query, null);
+    }
+
+    @Test
+    public void wrapsCheckedExceptionThrownByQueryWithExceptionDefinedByWrapper() throws Exception {
+        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
+        doThrow(exceptionThrownByCommand).when(query).call();
+        expectedException.expect(TestException.class);
+        expectedException.expectCause(is(exceptionThrownByCommand));
+
+        throwables.executeQuery(query, TestException::new);
+    }
+
     private class TestException extends Exception {
         public TestException(Exception e) {
             super(e);
