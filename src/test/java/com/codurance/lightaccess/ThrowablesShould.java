@@ -13,6 +13,7 @@ import static org.mockito.Mockito.*;
 
 public class ThrowablesShould {
 
+    private final Throwables throwables = new Throwables();
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
@@ -22,10 +23,11 @@ public class ThrowablesShould {
     @Mock
     private Command command;
 
+    @Mock
+    private Throwables.Query query;
+
     @Test
     public void executeCommand() throws Exception {
-        Throwables throwables = new Throwables();
-
         throwables.execute(command);
 
         verify(command).execute();
@@ -33,7 +35,6 @@ public class ThrowablesShould {
 
     @Test
     public void throwsRuntimeExceptionThrownByCommand() throws Exception {
-        Throwables throwables = new Throwables();
         doThrow(new RuntimeException("I throw runtimeException")).when(command).execute();
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(is("I throw runtimeException"));
@@ -43,7 +44,6 @@ public class ThrowablesShould {
 
     @Test
     public void wrapsCheckedExceptionThrownByCommandWithRuntimeException() throws Exception {
-        Throwables throwables = new Throwables();
         Exception exceptionThrownByCommand = new Exception("I throw checked exception");
         doThrow(exceptionThrownByCommand).when(command).execute();
         expectedException.expect(RuntimeException.class);
@@ -54,7 +54,6 @@ public class ThrowablesShould {
 
     @Test
     public void throwsRuntimeExceptionThrownByCommandWithoutWrapping() throws Exception {
-        Throwables throwables = new Throwables();
         doThrow(new RuntimeException("I throw runtimeException")).when(command).execute();
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage(is("I throw runtimeException"));
@@ -64,7 +63,6 @@ public class ThrowablesShould {
 
     @Test
     public void wrapsCheckedExceptionThrownByCommandWithExceptionDefinedByWrapper() throws Exception {
-        Throwables throwables = new Throwables();
         Exception exceptionThrownByCommand = new Exception("I throw checked exception");
         doThrow(exceptionThrownByCommand).when(command).execute();
         expectedException.expect(TestException.class);
