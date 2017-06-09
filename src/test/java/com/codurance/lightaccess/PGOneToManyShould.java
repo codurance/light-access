@@ -38,7 +38,7 @@ public class PGOneToManyShould {
     }
 
     @Test
-    public void collectEmptyMappedValuesGroupedByKeyWhenAllKeyValuePairsForGivenKeyHaveEmptyValues() throws Exception {
+    public void collectEmptyMappedValuesWhenAllKeyValuePairsForGivenKeyHaveEmptyValues() throws Exception {
         pgOneToMany.put(new PGKeyValue<>(KEY_WITHOUT_VALUES, empty()));
 
         assertThat(pgOneToMany.collect(MappedKeyValues::new),
@@ -46,7 +46,7 @@ public class PGOneToManyShould {
     }
 
     @Test
-    public void collectMappedValuesGroupedByKeyWhenKeyValuePairsForGivenKeyHaveEmptyAndNonEmptyValues() throws Exception {
+    public void collectMappedValuesOnlyForKeyValuePairsWithNonEmptyValues() throws Exception {
         pgOneToMany.put(new PGKeyValue<>(KEY_WITH_SINGLE_VALUE, of(SOME_VALUE)));
         pgOneToMany.put(new PGKeyValue<>(KEY_WITH_SINGLE_VALUE, empty()));
 
