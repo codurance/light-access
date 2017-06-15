@@ -1,0 +1,3 @@
+test:
+  post:
+    - ./gradlew test
