@@ -67,7 +67,9 @@ public class AcceptanceTest {
 
     @Test
     public void queryNextId() throws Exception {
-        dataSource.getConnection().createStatement().executeUpdate("CREATE SEQUENCE aSequence START WITH 2");
+        Connection connection = dataSource.getConnection();
+        connection.createStatement().executeUpdate("CREATE SEQUENCE aSequence START WITH 2");
+        connection.close();
 
         Integer id = executor.nextId("aSequence", (x) -> x);
 
