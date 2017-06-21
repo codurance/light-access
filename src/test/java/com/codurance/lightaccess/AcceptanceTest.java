@@ -6,9 +6,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import javax.sql.DataSource;
-import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -46,27 +44,29 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void executeQueryAndMapResults() throws Exception {
+    public void executeQueryAndMapResultsThenCloseConnection() throws Exception {
         executor.execute((conn) -> create(conn, new DummyEntity(2, "some name")));
         executor.execute((conn) -> create(conn, new DummyEntity(4, "other name")));
 
         List<DummyEntity> list = executor.execute((conn) -> fetch(ALL_ENTITIES_SQL, conn));
 
         assertThat(list, containsInAnyOrder(new DummyEntity(2, "some name"), new DummyEntity(4, "other name")));
+        assertThat(jdbcConnectionPool.getActiveConnections(), equalTo(0));
     }
 
     @Test
-    public void executeUpdateQuery() throws Exception {
+    public void executeUpdateQueryThenCloseConnection() throws Exception {
         executor.execute((conn) -> create(conn, new DummyEntity(2, "some name")));
 
         executor.executeUpdate((conn) -> updateName(conn, 2, "updated name"));
 
         List<DummyEntity> list = executor.execute((conn) -> fetch(ALL_ENTITIES_SQL, conn));
         assertThat(list, containsInAnyOrder(new DummyEntity(2, "updated name")));
+        assertThat(jdbcConnectionPool.getActiveConnections(), equalTo(0));
     }
 
     @Test
-    public void queryNextId() throws Exception {
+    public void queryNextIdThenCloseConnection() throws Exception {
         Connection connection = dataSource.getConnection();
         connection.createStatement().executeUpdate("CREATE SEQUENCE aSequence START WITH 2");
         connection.close();
@@ -74,6 +74,7 @@ public class AcceptanceTest {
         Integer id = executor.nextId("aSequence", (x) -> x);
 
         assertThat(id, equalTo(2));
+        assertThat(jdbcConnectionPool.getActiveConnections(), equalTo(0));
     }
 
 
