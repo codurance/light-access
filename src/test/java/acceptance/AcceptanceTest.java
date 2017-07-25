@@ -1,5 +1,8 @@
-package com.codurance.lightaccess;
+package acceptance;
 
+import com.codurance.lightaccess.PGConnection;
+import com.codurance.lightaccess.PGResultSet;
+import com.codurance.lightaccess.PGSQLExecutor;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
@@ -15,10 +18,12 @@ import static org.hamcrest.core.IsEqual.equalTo;
 
 public class AcceptanceTest {
 
-    public static final String INSERT_DUMMY_ENTITIES_SQL = "insert into entities "+
-            "(id, name) values (?, ?)";
-    public static final String UPDATE_DUMMY_ENTITY_SQL = "update entities set name = ? where id = ?";
-    public static final String ALL_ENTITIES_SQL = "select * from entities";
+    private static final String CREATE_ENTITIES_TABLE = "CREATE TABLE entities (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255))";
+
+    private static final String INSERT_ENTITY_SQL = "insert into entities (id, name) values (?, ?)";
+    private static final String UPDATE_ENTITY_SQL = "update entities set name = ? where id = ?";
+    private static final String SELECT_ALL_ENTITIES_SQL = "select * from entities";
+
     private DataSource dataSource;
     private PGSQLExecutor executor;
     private JdbcConnectionPool jdbcConnectionPool;
@@ -30,9 +35,7 @@ public class AcceptanceTest {
         executor = new PGSQLExecutor(dataSource);
 
         Connection connection = dataSource.getConnection();
-        connection.createStatement().executeUpdate("CREATE TABLE entities ("
-                +" id VARCHAR(255) PRIMARY KEY" +
-                ", name VARCHAR(255))");
+        connection.createStatement().executeUpdate(CREATE_ENTITIES_TABLE);
         connection.close();
     }
 
@@ -48,7 +51,7 @@ public class AcceptanceTest {
         executor.execute((conn) -> create(conn, new DummyEntity(2, "some name")));
         executor.execute((conn) -> create(conn, new DummyEntity(4, "other name")));
 
-        List<DummyEntity> list = executor.execute((conn) -> fetch(ALL_ENTITIES_SQL, conn));
+        List<DummyEntity> list = executor.execute((conn) -> fetch(SELECT_ALL_ENTITIES_SQL, conn));
 
         assertThat(list, containsInAnyOrder(new DummyEntity(2, "some name"), new DummyEntity(4, "other name")));
         assertThat(jdbcConnectionPool.getActiveConnections(), equalTo(0));
@@ -60,7 +63,7 @@ public class AcceptanceTest {
 
         executor.executeUpdate((conn) -> updateName(conn, 2, "updated name"));
 
-        List<DummyEntity> list = executor.execute((conn) -> fetch(ALL_ENTITIES_SQL, conn));
+        List<DummyEntity> list = executor.execute((conn) -> fetch(SELECT_ALL_ENTITIES_SQL, conn));
         assertThat(list, containsInAnyOrder(new DummyEntity(2, "updated name")));
         assertThat(jdbcConnectionPool.getActiveConnections(), equalTo(0));
     }
@@ -85,7 +88,7 @@ public class AcceptanceTest {
     }
 
     private DummyEntity create(PGConnection conn, DummyEntity entity) {
-        conn.prepareStatement(INSERT_DUMMY_ENTITIES_SQL)
+        conn.prepareStatement(INSERT_ENTITY_SQL)
                 .withParam(entity.id)
                 .withParam(entity.name)
                 .executeUpdate();
@@ -93,7 +96,7 @@ public class AcceptanceTest {
     }
 
     private void updateName(PGConnection conn, int id, String name) {
-        conn.prepareStatement(UPDATE_DUMMY_ENTITY_SQL)
+        conn.prepareStatement(UPDATE_ENTITY_SQL)
                 .withParam(name)
                 .withParam(id)
                 .executeUpdate();
