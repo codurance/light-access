@@ -3,11 +3,11 @@ package com.codurance.lightaccess;
 import java.util.*;
 import java.util.function.BiFunction;
 
-public class PGOneToMany<K, V> {
+public class OneToMany<K, V> {
 
     private Map<K, List<V>> data = new HashMap<>();
 
-    public void put(PGKeyValue<K, Optional<V>> keyValue) {
+    public void put(KeyValue<K, Optional<V>> keyValue) {
         if (keyValue.getValue().isPresent()) {
             this.put(keyValue.getKey(), keyValue.getValue());
         } else {

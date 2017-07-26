@@ -15,11 +15,11 @@ public class LightAccess {
     }
 
     public interface SQLQuery<T> {
-        T execute(PGConnection connection) throws SQLException;
+        T execute(LAConnection connection) throws SQLException;
     }
 
     private interface Command {
-        void execute(PGConnection connection) throws SQLException;
+        void execute(LAConnection connection) throws SQLException;
     }
 
     public interface SQLCommand extends Command {}
@@ -27,7 +27,7 @@ public class LightAccess {
     public interface DDLCommand extends Command {}
 
     public <T> T executeQuery(SQLQuery<T> sqlQuery) {
-        try (PGConnection conn = pgConnection()) {
+        try (LAConnection conn = pgConnection()) {
             return sqlQuery.execute(conn);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -47,7 +47,7 @@ public class LightAccess {
     }
 
     public <T> T nextId(String sequenceName, Function<Integer, T> nextId) {
-        try (PGConnection conn = pgConnection()) {
+        try (LAConnection conn = pgConnection()) {
             CallableStatement cs = conn.prepareCall("select nextval('" + sequenceName + "')");
             ResultSet resultSet = cs.executeQuery();
             resultSet.next();
@@ -58,16 +58,16 @@ public class LightAccess {
     }
 
     private void execute(Command command) {
-        try (PGConnection conn = pgConnection()) {
+        try (LAConnection conn = pgConnection()) {
             command.execute(conn);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    private PGConnection pgConnection() {
+    private LAConnection pgConnection() {
         try {
-            return new PGConnection(ds.getConnection());
+            return new LAConnection(ds.getConnection());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

@@ -5,11 +5,11 @@ import java.sql.Connection;
 
 import static com.codurance.lightaccess.Throwables.executeQuery;
 
-public class PGConnection implements AutoCloseable {
+public class LAConnection implements AutoCloseable {
 
     private Connection connection;
 
-    public PGConnection(Connection connection) {
+    public LAConnection(Connection connection) {
         this.connection = connection;
     }
 
@@ -17,8 +17,8 @@ public class PGConnection implements AutoCloseable {
         return this.connection;
     }
 
-    public PGPreparedStatementBuilder prepareStatement(String sql) {
-        return new PGPreparedStatementBuilder(connection, sql);
+    public PreparedStatementBuilder prepareStatement(String sql) {
+        return new PreparedStatementBuilder(connection, sql);
     }
 
     public StatementBuilder statement(String sql) {
