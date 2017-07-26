@@ -6,11 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
 
-public class PGSQLExecutor {
+public class LightAccessExecutor {
 
     private DataSource ds;
 
-    public PGSQLExecutor(DataSource connection) {
+    public LightAccessExecutor(DataSource connection) {
         this.ds = connection;
     }
 
