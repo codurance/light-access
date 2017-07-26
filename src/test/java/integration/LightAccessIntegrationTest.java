@@ -123,11 +123,11 @@ public class LightAccessIntegrationTest {
     }
 
     @Test
-    public void return_next_id_using_sequence() throws Exception {
+    public void return_next_integer_id_using_sequence() throws Exception {
         createSequence("id_sequence", "10");
 
-        Integer firstId = lightAccess.nextId("id_sequence", (x) -> x);
-        Integer secondId = lightAccess.nextId("id_sequence", (x) -> x);
+        int firstId = lightAccess.nextId("id_sequence");
+        int secondId = lightAccess.nextId("id_sequence");
 
         assertThat(firstId).isEqualTo(10);
         assertThat(secondId).isEqualTo(11);
