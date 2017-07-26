@@ -1,8 +1,8 @@
 package acceptance;
 
-import com.codurance.lightaccess.LightAccessExecutor;
-import com.codurance.lightaccess.LightAccessExecutor.SQLCommand;
-import com.codurance.lightaccess.LightAccessExecutor.SQLQuery;
+import com.codurance.lightaccess.LightAccess;
+import com.codurance.lightaccess.LightAccess.SQLCommand;
+import com.codurance.lightaccess.LightAccess.SQLQuery;
 import com.codurance.lightaccess.PGResultSet;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
@@ -38,87 +38,86 @@ public class LightAccessAcceptanceTest {
 
 
     private static DataSource dataSource;
-    private static LightAccessExecutor lightAccessExecutor;
+    private static LightAccess lightAccess;
     private static JdbcConnectionPool jdbcConnectionPool;
 
     @BeforeClass
     public static void before_all_tests() throws SQLException {
         jdbcConnectionPool = JdbcConnectionPool.create("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "user", "password");
         dataSource = jdbcConnectionPool;
-        lightAccessExecutor = new LightAccessExecutor(dataSource);
-
+        lightAccess = new LightAccess(dataSource);
     }
 
     @Before
     public void before_each_test() throws Exception {
-        lightAccessExecutor.executeUpdate(createEntitiesTable());
+        lightAccess.executeCommand(createEntitiesTable());
     }
 
     @After
     public void after_each_test() throws Exception {
-        lightAccessExecutor.executeUpdate(dropAllObjects());
+        lightAccess.executeCommand(dropAllObjects());
     }
 
     @Test public void
     close_connection_after_executing_a_query() {
-        lightAccessExecutor.execute((conn) -> SELECT_ALL_ENTITIES_SQL);
+        lightAccess.executeQuery((conn) -> SELECT_ALL_ENTITIES_SQL);
 
         assertThat(jdbcConnectionPool.getActiveConnections()).isEqualTo(0);
     }
 
     @Test public void
     close_connection_after_executing_a_command() {
-        lightAccessExecutor.executeUpdate(deleteEntities());
+        lightAccess.executeCommand(deleteEntities());
 
         assertThat(jdbcConnectionPool.getActiveConnections()).isEqualTo(0);
     }
 
     @Test public void
     create_and_retrieve_entities() {
-        lightAccessExecutor.executeUpdate(insert(ENTITY_ONE));
-        lightAccessExecutor.executeUpdate(insert(ENTITY_TWO));
+        lightAccess.executeCommand(insert(ENTITY_ONE));
+        lightAccess.executeCommand(insert(ENTITY_TWO));
 
-        List<Entity> entities = lightAccessExecutor.execute(retrieveAllEntities());
+        List<Entity> entities = lightAccess.executeQuery(retrieveAllEntities());
 
         assertThat(entities).containsExactlyInAnyOrder(ENTITY_ONE, ENTITY_TWO);
     }
 
     @Test public void
     retrieve_a_single_entity() {
-        lightAccessExecutor.executeUpdate(insert(ENTITY_ONE));
-        lightAccessExecutor.executeUpdate(insert(ENTITY_TWO));
+        lightAccess.executeCommand(insert(ENTITY_ONE));
+        lightAccess.executeCommand(insert(ENTITY_TWO));
 
-        Optional<Entity> entity = lightAccessExecutor.execute(retrieveEntityWithId(ENTITY_TWO.id));
+        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_TWO.id));
 
         assertThat(entity.get()).isEqualTo(ENTITY_TWO);
     }
 
     @Test public void
     retrieve_an_empty_optional_when_entity_is_not_found() {
-        lightAccessExecutor.executeUpdate(insert(ENTITY_ONE));
+        lightAccess.executeCommand(insert(ENTITY_ONE));
 
-        Optional<Entity> entity = lightAccessExecutor.execute(retrieveEntityWithId(ENTITY_TWO.id));
+        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_TWO.id));
 
         assertThat(entity.isPresent()).isEqualTo(false);
     }
 
     @Test public void
     delete_entity() {
-        lightAccessExecutor.executeUpdate(insert(ENTITY_ONE));
-        lightAccessExecutor.executeUpdate(insert(ENTITY_TWO));
+        lightAccess.executeCommand(insert(ENTITY_ONE));
+        lightAccess.executeCommand(insert(ENTITY_TWO));
 
-        lightAccessExecutor.executeUpdate(delete(ENTITY_ONE));
+        lightAccess.executeCommand(delete(ENTITY_ONE));
 
-        List<Entity> entities = lightAccessExecutor.execute(retrieveAllEntities());
+        List<Entity> entities = lightAccess.executeQuery(retrieveAllEntities());
         assertThat(entities).containsExactlyInAnyOrder(ENTITY_TWO);
     }
 
     @Test public void
     update_entity() {
-        lightAccessExecutor.executeUpdate(insert(ENTITY_ONE));
-        lightAccessExecutor.executeUpdate(updateEntityName(1, "Another name"));
+        lightAccess.executeCommand(insert(ENTITY_ONE));
+        lightAccess.executeCommand(updateEntityName(1, "Another name"));
 
-        Optional<Entity> entity = lightAccessExecutor.execute(retrieveEntityWithId(ENTITY_ONE.id));
+        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_ONE.id));
 
         assertThat(entity.get()).isEqualTo(new Entity(1, "Another name"));
     }
@@ -127,8 +126,8 @@ public class LightAccessAcceptanceTest {
     public void return_next_id_using_sequence() throws Exception {
         createSequence("id_sequence", "10");
 
-        Integer firstId = lightAccessExecutor.nextId("id_sequence", (x) -> x);
-        Integer secondId = lightAccessExecutor.nextId("id_sequence", (x) -> x);
+        Integer firstId = lightAccess.nextId("id_sequence", (x) -> x);
+        Integer secondId = lightAccess.nextId("id_sequence", (x) -> x);
 
         assertThat(firstId).isEqualTo(10);
         assertThat(secondId).isEqualTo(11);
@@ -138,8 +137,8 @@ public class LightAccessAcceptanceTest {
     public void return_next_id_converted_to_a_different_type() throws Exception {
         createSequence("id_sequence", "10");
 
-        String firstId = lightAccessExecutor.nextId("id_sequence", Object::toString);
-        EntityID secondId = lightAccessExecutor.nextId("id_sequence", (x) -> new EntityID(x));
+        String firstId = lightAccess.nextId("id_sequence", Object::toString);
+        EntityID secondId = lightAccess.nextId("id_sequence", (x) -> new EntityID(x));
 
         assertThat(firstId).isEqualTo("10");
         assertThat(secondId).isEqualTo(new EntityID(11));
