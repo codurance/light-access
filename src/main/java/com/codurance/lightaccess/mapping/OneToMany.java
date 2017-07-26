@@ -1,4 +1,4 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.mapping;
 
 import java.util.*;
 import java.util.function.BiFunction;

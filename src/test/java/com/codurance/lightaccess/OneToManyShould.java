@@ -1,5 +1,7 @@
 package com.codurance.lightaccess;
 
+import com.codurance.lightaccess.mapping.KeyValue;
+import com.codurance.lightaccess.mapping.OneToMany;
 import org.junit.Before;
 import org.junit.Test;
 import java.util.*;

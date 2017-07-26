@@ -1,4 +1,4 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.connection;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -21,12 +21,13 @@ public class LAConnection implements AutoCloseable {
         return new StatementBuilder(connection, sql);
     }
 
+    //TODO Check if this method can be written as statement and prepareStatement
+    public CallableStatement prepareCall(String sql) {
+        return executeQuery(() -> connection.prepareCall(sql));
+    }
+
     @Override
     public void close() throws Exception {
         connection.close();
-    }
-
-    protected CallableStatement prepareCall(String sql) {
-        return executeQuery(() -> connection.prepareCall(sql));
     }
 }

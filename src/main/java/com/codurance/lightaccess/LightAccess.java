@@ -1,5 +1,7 @@
 package com.codurance.lightaccess;
 
+import com.codurance.lightaccess.connection.LAConnection;
+
 import javax.sql.DataSource;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;

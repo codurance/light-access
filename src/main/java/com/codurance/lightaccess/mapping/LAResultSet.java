@@ -1,4 +1,6 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.mapping;
+
+import com.codurance.lightaccess.Throwables;
 
 import java.sql.Date;
 import java.sql.ResultSet;

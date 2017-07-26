@@ -1,4 +1,4 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.connection;
 
 import java.sql.Connection;
 import java.sql.SQLException;

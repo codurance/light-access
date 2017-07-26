@@ -4,7 +4,7 @@ import com.codurance.lightaccess.LightAccess;
 import com.codurance.lightaccess.LightAccess.DDLCommand;
 import com.codurance.lightaccess.LightAccess.SQLCommand;
 import com.codurance.lightaccess.LightAccess.SQLQuery;
-import com.codurance.lightaccess.LAResultSet;
+import com.codurance.lightaccess.mapping.LAResultSet;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;

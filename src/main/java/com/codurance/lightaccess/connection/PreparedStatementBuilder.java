@@ -1,4 +1,7 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.connection;
+
+import com.codurance.lightaccess.mapping.LAResultSet;
+import com.codurance.lightaccess.Throwables;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -14,7 +17,7 @@ public class PreparedStatementBuilder {
     private final PreparedStatement preparedStatement;
     private int paramIndex = 0;
 
-    public PreparedStatementBuilder(Connection connection, String sql) {
+    PreparedStatementBuilder(Connection connection, String sql) {
         try {
             this.preparedStatement = connection.prepareStatement(sql);
         } catch (SQLException e) {
