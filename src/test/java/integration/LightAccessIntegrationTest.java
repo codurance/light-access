@@ -1,4 +1,4 @@
-package acceptance;
+package integration;
 
 import com.codurance.lightaccess.LightAccess;
 import com.codurance.lightaccess.LightAccess.SQLCommand;
@@ -21,7 +21,7 @@ import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class LightAccessAcceptanceTest {
+public class LightAccessIntegrationTest {
 
     private static final String CREATE_ENTITIES_TABLE = "CREATE TABLE entities (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255))";
     private static final String DROP_ALL_OBJECTS = "DROP ALL OBJECTS";
