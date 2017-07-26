@@ -6,11 +6,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
 
-public class LightAccessExecutor {
+public class LightAccess {
 
     private DataSource ds;
 
-    public LightAccessExecutor(DataSource connection) {
+    public LightAccess(DataSource connection) {
         this.ds = connection;
     }
 
@@ -18,11 +18,15 @@ public class LightAccessExecutor {
         T execute(PGConnection connection) throws SQLException;
     }
 
-    public interface SQLCommand {
+    private interface Command {
         void execute(PGConnection connection) throws SQLException;
     }
 
-    public <T> T execute(SQLQuery<T> sqlQuery) {
+    public interface SQLCommand extends Command {}
+
+    public interface DDLCommand extends Command {}
+
+    public <T> T executeQuery(SQLQuery<T> sqlQuery) {
         try (PGConnection conn = pgConnection()) {
             return sqlQuery.execute(conn);
         } catch (Exception e) {
@@ -30,12 +34,16 @@ public class LightAccessExecutor {
         }
     }
 
-    public void executeUpdate(SQLCommand sqlCommand) {
-        try (PGConnection conn = pgConnection()) {
-            sqlCommand.execute(conn);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public void executeCommand(SQLCommand sqlCommand) {
+        execute(sqlCommand);
+    }
+
+    public void executeDDLCommand(DDLCommand ddlCommand) {
+        execute(ddlCommand);
+    }
+
+    public int nextId(String sequenceName) {
+        return nextId(sequenceName, (x) -> x);
     }
 
     public <T> T nextId(String sequenceName, Function<Integer, T> nextId) {
@@ -44,6 +52,14 @@ public class LightAccessExecutor {
             ResultSet resultSet = cs.executeQuery();
             resultSet.next();
             return nextId.apply(resultSet.getInt(1));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void execute(Command command) {
+        try (PGConnection conn = pgConnection()) {
+            command.execute(conn);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
