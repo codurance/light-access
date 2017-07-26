@@ -22,6 +22,10 @@ public class LightAccess {
         void execute(PGConnection connection) throws SQLException;
     }
 
+    public interface DDLCommand {
+        void execute(PGConnection connection) throws SQLException;
+    }
+
     public <T> T executeQuery(SQLQuery<T> sqlQuery) {
         try (PGConnection conn = pgConnection()) {
             return sqlQuery.execute(conn);
@@ -33,6 +37,14 @@ public class LightAccess {
     public void executeCommand(SQLCommand sqlCommand) {
         try (PGConnection conn = pgConnection()) {
             sqlCommand.execute(conn);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void executeDDLCommand(DDLCommand ddlCommand) {
+        try (PGConnection conn = pgConnection()) {
+            ddlCommand.execute(conn);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

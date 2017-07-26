@@ -21,6 +21,10 @@ public class PGConnection implements AutoCloseable {
         return new PGPreparedStatementBuilder(connection, sql);
     }
 
+    public StatementBuilder statement(String sql) {
+        return new StatementBuilder(connection, sql);
+    }
+
     @Override
     public void close() throws Exception {
         connection.close();
