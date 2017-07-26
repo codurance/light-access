@@ -148,11 +148,6 @@ public class LightAccessIntegrationTest {
         assertThat(secondId).isEqualTo(new EntityID(11));
     }
 
-    private DDLCommand createSequence(String sequenceName, String initialValue) {
-        String id_sequence = format(CREATE_SEQUENCE_DDL, sequenceName, initialValue);
-        return (conn) -> conn.statement(id_sequence).execute();
-    }
-
     private SQLCommand updateEntityName(int id, String name) {
         return conn -> conn.prepareStatement(UPDATE_ENTITY_NAME_SQL)
                             .withParam(name)
@@ -180,7 +175,6 @@ public class LightAccessIntegrationTest {
                             .onlyResult(this::toEntity);
     }
 
-
     private SQLQuery<List<Entity>> retrieveAllEntities() {
         return conn -> conn.prepareStatement(SELECT_ALL_ENTITIES_SQL)
                             .executeQuery()
@@ -195,12 +189,17 @@ public class LightAccessIntegrationTest {
         return new Entity(pgResultSet.getInt(1), pgResultSet.getString(2));
     }
 
+    private DDLCommand createSequence(String sequenceName, String initialValue) {
+        String id_sequence = format(CREATE_SEQUENCE_DDL, sequenceName, initialValue);
+        return (conn) -> conn.statement(id_sequence).execute();
+    }
+
     private DDLCommand createEntitiesTable() {
-        return (conn) -> conn.prepareStatement(CREATE_ENTITIES_TABLE).executeUpdate();
+        return (conn) -> conn.statement(CREATE_ENTITIES_TABLE).execute();
     }
 
     private DDLCommand dropAllObjects() {
-        return (conn) -> conn.prepareStatement(DROP_ALL_OBJECTS).executeUpdate();
+        return (conn) -> conn.statement(DROP_ALL_OBJECTS).execute();
     }
     
     private static class Entity {
