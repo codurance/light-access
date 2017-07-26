@@ -13,10 +13,6 @@ public class LAConnection implements AutoCloseable {
         this.connection = connection;
     }
 
-    public Connection connection() {
-        return this.connection;
-    }
-
     public PreparedStatementBuilder prepareStatement(String sql) {
         return new PreparedStatementBuilder(connection, sql);
     }
