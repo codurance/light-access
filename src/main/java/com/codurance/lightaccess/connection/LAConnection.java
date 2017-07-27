@@ -3,7 +3,7 @@ package com.codurance.lightaccess.connection;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 
-import static com.codurance.lightaccess.Throwables.executeQuery;
+import static com.codurance.lightaccess.executables.Throwables.executeQuery;
 
 public class LAConnection implements AutoCloseable {
 

@@ -1,7 +1,7 @@
 package com.codurance.lightaccess.connection;
 
 import com.codurance.lightaccess.mapping.LAResultSet;
-import com.codurance.lightaccess.Throwables;
+import com.codurance.lightaccess.executables.Throwables;
 
 import java.sql.Connection;
 import java.sql.Date;
@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import static com.codurance.lightaccess.Throwables.execute;
+import static com.codurance.lightaccess.executables.Throwables.execute;
 
 public class PreparedStatementBuilder {
 
