@@ -1,10 +1,10 @@
 package integration;
 
 import com.codurance.lightaccess.LightAccess;
-import com.codurance.lightaccess.LightAccess.DDLCommand;
-import com.codurance.lightaccess.LightAccess.SQLCommand;
-import com.codurance.lightaccess.LightAccess.SQLQuery;
-import com.codurance.lightaccess.PGResultSet;
+import com.codurance.lightaccess.executables.DDLCommand;
+import com.codurance.lightaccess.executables.SQLCommand;
+import com.codurance.lightaccess.executables.SQLQuery;
+import com.codurance.lightaccess.mapping.LAResultSet;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
@@ -163,9 +163,9 @@ public class LightAccessIntegrationTest {
 
     private SQLCommand insert(Entity entity) {
         return conn -> conn.prepareStatement(INSERT_ENTITY_SQL)
-                                                .withParam(entity.id)
-                                                .withParam(entity.name)
-                                                .executeUpdate();
+                            .withParam(entity.id)
+                            .withParam(entity.name)
+                            .executeUpdate();
     }
 
     private SQLQuery<Optional<Entity>> retrieveEntityWithId(int id) {
@@ -185,8 +185,8 @@ public class LightAccessIntegrationTest {
         return conn -> conn.prepareStatement(DELETE_ENTITIES_SQL).executeUpdate();
     }
 
-    private Entity toEntity(PGResultSet pgResultSet) {
-        return new Entity(pgResultSet.getInt(1), pgResultSet.getString(2));
+    private Entity toEntity(LAResultSet LAResultSet) {
+        return new Entity(LAResultSet.getInt(1), LAResultSet.getString(2));
     }
 
     private DDLCommand createSequence(String sequenceName, String initialValue) {

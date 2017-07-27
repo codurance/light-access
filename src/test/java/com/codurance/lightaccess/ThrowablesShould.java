@@ -1,6 +1,7 @@
 package com.codurance.lightaccess;
 
-import com.codurance.lightaccess.Throwables.Command;
+import com.codurance.lightaccess.executables.Throwables;
+import com.codurance.lightaccess.executables.Throwables.Command;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

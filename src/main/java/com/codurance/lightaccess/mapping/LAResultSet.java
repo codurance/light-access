@@ -1,4 +1,6 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.mapping;
+
+import com.codurance.lightaccess.executables.Throwables;
 
 import java.sql.Date;
 import java.sql.ResultSet;
@@ -10,11 +12,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class PGResultSet {
+public class LAResultSet {
     private final SimpleDateFormat YYYY_MM_DD_date_format = new SimpleDateFormat("yyyy-MM-dd");
     private ResultSet resultSet;
 
-    public PGResultSet(ResultSet resultSet) {
+    public LAResultSet(ResultSet resultSet) {
         this.resultSet = resultSet;
     }
 
@@ -42,14 +44,14 @@ public class PGResultSet {
         return (value != null) ? Optional.of(value) : Optional.empty();
     }
 
-    public <T> Optional<T> onlyResult(Function<PGResultSet, T> mapOne) throws SQLException {
+    public <T> Optional<T> onlyResult(Function<LAResultSet, T> mapOne) throws SQLException {
         if (resultSet.next()) {
             return Optional.of(mapOne.apply(this));
         }
         return Optional.empty();
     }
 
-    public <T> List<T> mapResults(Function<PGResultSet, T> mapResults) {
+    public <T> List<T> mapResults(Function<LAResultSet, T> mapResults) {
         List<T> list = new ArrayList<>();
         while (this.next()) {
             list.add(mapResults.apply(this));
@@ -57,10 +59,10 @@ public class PGResultSet {
         return list;
     }
 
-    public <K, V> PGOneToMany<K, V> normaliseOneToMany(Function<PGResultSet, PGKeyValue<K, Optional<V>>> normalise) {
-        PGOneToMany<K, V> oneToMany = new PGOneToMany<>();
+    public <K, V> OneToMany<K, V> normaliseOneToMany(Function<LAResultSet, KeyValue<K, Optional<V>>> normalise) {
+        OneToMany<K, V> oneToMany = new OneToMany<>();
         while (this.next()) {
-            PGKeyValue<K, Optional<V>> kv = normalise.apply(this);
+            KeyValue<K, Optional<V>> kv = normalise.apply(this);
             oneToMany.put(kv);
         }
         return oneToMany;

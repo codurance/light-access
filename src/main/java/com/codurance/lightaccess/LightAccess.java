@@ -1,10 +1,16 @@
 package com.codurance.lightaccess;
 
+import com.codurance.lightaccess.connection.LAConnection;
+import com.codurance.lightaccess.executables.*;
+
 import javax.sql.DataSource;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
+
+import static com.codurance.lightaccess.executables.Throwables.executeWithResource;
+import static java.lang.String.format;
 
 public class LightAccess {
 
@@ -14,24 +20,9 @@ public class LightAccess {
         this.ds = connection;
     }
 
-    public interface SQLQuery<T> {
-        T execute(PGConnection connection) throws SQLException;
-    }
-
-    private interface Command {
-        void execute(PGConnection connection) throws SQLException;
-    }
-
-    public interface SQLCommand extends Command {}
-
-    public interface DDLCommand extends Command {}
-
     public <T> T executeQuery(SQLQuery<T> sqlQuery) {
-        try (PGConnection conn = pgConnection()) {
-            return sqlQuery.execute(conn);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        LAConnection conn = pgConnection();
+        return executeWithResource(conn, () -> sqlQuery.execute(conn));
     }
 
     public void executeCommand(SQLCommand sqlCommand) {
@@ -47,29 +38,23 @@ public class LightAccess {
     }
 
     public <T> T nextId(String sequenceName, Function<Integer, T> nextId) {
-        try (PGConnection conn = pgConnection()) {
-            CallableStatement cs = conn.prepareCall("select nextval('" + sequenceName + "')");
-            ResultSet resultSet = cs.executeQuery();
-            resultSet.next();
-            return nextId.apply(resultSet.getInt(1));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        LAConnection conn = pgConnection();
+        return executeWithResource(conn, () -> nextId.apply(sequenceNextId(sequenceName, conn)));
+    }
+
+    private int sequenceNextId(String sequenceName, LAConnection conn) throws SQLException {
+        CallableStatement cs = conn.prepareCall(format("select nextval('%s')", sequenceName));
+        ResultSet resultSet = cs.executeQuery();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     private void execute(Command command) {
-        try (PGConnection conn = pgConnection()) {
-            command.execute(conn);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        LAConnection c = pgConnection();
+        executeWithResource(c, () -> command.execute(c));
     }
 
-    private PGConnection pgConnection() {
-        try {
-            return new PGConnection(ds.getConnection());
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+    private LAConnection pgConnection() {
+        return Throwables.executeQuery(() -> new LAConnection(ds.getConnection()));
     }
 }

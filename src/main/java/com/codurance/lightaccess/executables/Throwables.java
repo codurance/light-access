@@ -1,4 +1,4 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.executables;
 
 import java.util.concurrent.Callable;
 
@@ -45,4 +45,23 @@ public class Throwables {
             throw wrapper.wrap(e);
         }
     }
+
+    public static <T extends AutoCloseable> void executeWithResource(T closeableResource, Command command) {
+        try(T ignored = closeableResource) {
+            command.execute();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static <R, T extends AutoCloseable> R executeWithResource(T closeableResource, Query<R> callable) {
+        try(T ignored = closeableResource) {
+            return callable.call();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
 }
