@@ -1,9 +1,6 @@
 package com.codurance.lightaccess.connection;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-
-import static com.codurance.lightaccess.executables.Throwables.executeQuery;
 
 public class LAConnection implements AutoCloseable {
 
@@ -13,19 +10,42 @@ public class LAConnection implements AutoCloseable {
         this.connection = connection;
     }
 
+    /**
+     * Used for SQL statements with parameters and that can be executed
+     * multiple times.
+     *
+     * @param sql SQL query or command.
+     * @return
+     */
     public PreparedStatementBuilder prepareStatement(String sql) {
         return new PreparedStatementBuilder(connection, sql);
     }
 
-    public StatementBuilder statement(String sql) {
-        return new StatementBuilder(connection, sql);
+    /**
+     * Used for DDL commands.
+     *
+     * @param ddl DDL statement.
+     * @return
+     */
+    public StatementBuilder statement(String ddl) {
+        return new StatementBuilder(connection, ddl);
     }
 
-    //TODO Check if this method can be written as statement and prepareStatement
-    public CallableStatement prepareCall(String sql) {
-        return executeQuery(() -> connection.prepareCall(sql));
+    /**
+     * Used for invoking stored procedures and sequences.
+     *
+     * @param sql SQL statement for calling stored procedures or sequences.
+     * @return
+     */
+    public CallableStatementBuilder callableStatement(String sql) {
+        return new CallableStatementBuilder(connection, sql);
     }
 
+    /**
+     * Closes the connection.
+     *
+     * @throws Exception
+     */
     @Override
     public void close() throws Exception {
         connection.close();
