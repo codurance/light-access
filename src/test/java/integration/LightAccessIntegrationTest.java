@@ -12,6 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,19 +23,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LightAccessIntegrationTest {
 
-    private static final String CREATE_ENTITIES_TABLE = "CREATE TABLE entities (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255))";
+    private static final String CREATE_ENTITIES_TABLE = "CREATE TABLE entities (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
     private static final String CREATE_SEQUENCE_DDL = "CREATE SEQUENCE %s START WITH %s";
     private static final String DROP_ALL_OBJECTS = "DROP ALL OBJECTS";
 
-    private static final String INSERT_ENTITY_SQL = "insert into entities (id, name) values (?, ?)";
+    private static final String INSERT_ENTITY_SQL = "insert into entities (id, name, date) values (?, ?, ?)";
     private static final String DELETE_ENTITIES_SQL = "delete from entities";
     private static final String DELETE_ENTITY_SQL = "delete from entities where id = ?";
     private static final String UPDATE_ENTITY_NAME_SQL = "update entities set name = ? where id = ?";
     private static final String SELECT_ALL_ENTITIES_SQL = "select * from entities";
     private static final String SELECT_ENTITY_BY_ID_SQL = "select * from entities where id = ?";
 
-    private static Entity ENTITY_ONE = new Entity(1, "Entity 1");
-    private static Entity ENTITY_TWO = new Entity(2, "Entity 2");
+    private static final LocalDate TODAY = LocalDate.of(2017, 07, 27);
+    private static final LocalDate YESTERDAY = LocalDate.of(2017, 07, 26);
+
+    private static Entity ENTITY_ONE = new Entity(1, "Entity 1", YESTERDAY);
+    private static Entity ENTITY_TWO = new Entity(2, "Entity 2", TODAY);
 
     private static LightAccess lightAccess;
     private static JdbcConnectionPool jdbcConnectionPool;
@@ -123,7 +127,7 @@ public class LightAccessIntegrationTest {
 
         Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_ONE.id));
 
-        assertThat(entity.get()).isEqualTo(new Entity(1, "Another name"));
+        assertThat(entity.get()).isEqualTo(new Entity(ENTITY_ONE.id, "Another name", ENTITY_ONE.date));
     }
 
     @Test
@@ -142,7 +146,7 @@ public class LightAccessIntegrationTest {
         lightAccess.executeDDLCommand(createSequence("id_sequence", "10"));
 
         String firstId = lightAccess.nextId("id_sequence", Object::toString);
-        EntityID secondId = lightAccess.nextId("id_sequence", (x) -> new EntityID(x));
+        EntityID secondId = lightAccess.nextId("id_sequence", EntityID::new);
 
         assertThat(firstId).isEqualTo("10");
         assertThat(secondId).isEqualTo(new EntityID(11));
@@ -165,6 +169,7 @@ public class LightAccessIntegrationTest {
         return conn -> conn.prepareStatement(INSERT_ENTITY_SQL)
                             .withParam(entity.id)
                             .withParam(entity.name)
+                            .withParam(entity.date)
                             .executeUpdate();
     }
 
@@ -185,8 +190,10 @@ public class LightAccessIntegrationTest {
         return conn -> conn.prepareStatement(DELETE_ENTITIES_SQL).executeUpdate();
     }
 
-    private Entity toEntity(LAResultSet LAResultSet) {
-        return new Entity(LAResultSet.getInt(1), LAResultSet.getString(2));
+    private Entity toEntity(LAResultSet laResultSet) {
+        return new Entity(laResultSet.getInt(1),
+                          laResultSet.getString(2),
+                          laResultSet.getLocalDate(3));
     }
 
     private DDLCommand createSequence(String sequenceName, String initialValue) {
@@ -205,10 +212,12 @@ public class LightAccessIntegrationTest {
     private static class Entity {
         private int id;
         private String name;
+        private LocalDate date;
 
-        Entity(int id, String name) {
+        Entity(int id, String name, LocalDate date) {
             this.id = id;
             this.name = name;
+            this.date = date;
         }
 
         @Override
@@ -226,6 +235,7 @@ public class LightAccessIntegrationTest {
             return "Entity{" +
                     "id=" + id +
                     ", name='" + name + '\'' +
+                    ", date=" + date +
                     '}';
         }
     }

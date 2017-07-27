@@ -1,48 +1,34 @@
 package com.codurance.lightaccess.connection;
 
-import com.codurance.lightaccess.mapping.LAResultSet;
 import com.codurance.lightaccess.executables.Throwables;
+import com.codurance.lightaccess.mapping.LAResultSet;
 
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static com.codurance.lightaccess.executables.Throwables.execute;
 
 public class PreparedStatementBuilder {
 
-    private final PreparedStatement preparedStatement;
+    private PreparedStatement preparedStatement;
     private int paramIndex = 0;
 
     PreparedStatementBuilder(Connection connection, String sql) {
-        try {
-            this.preparedStatement = connection.prepareStatement(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        execute(() -> this.preparedStatement = connection.prepareStatement(sql));
     }
 
     public PreparedStatementBuilder withParam(String param) {
         return withParam((paramIndex) -> execute(() -> preparedStatement.setString(paramIndex, param)));
     }
 
-    public PreparedStatementBuilder withOptionalStringParam(Optional<String> param) {
-        return withParam(param.isPresent() ? param.get() : "");
-    }
-
     public PreparedStatementBuilder withParam(int param) {
         return withParam((paramIndex) -> execute(() -> preparedStatement.setInt(paramIndex, param)));
     }
 
-    public PreparedStatementBuilder withParam(Date param) {
-        return withParam((paramIndex) -> execute(() -> preparedStatement.setDate(paramIndex, param)));
-    }
-
-    public PreparedStatementBuilder withOptionalLocalDateParam(Optional<LocalDate> param) {
-        return withParam(param.isPresent() ? new Date(param.get().toEpochDay()) : null);
+    public PreparedStatementBuilder withParam(LocalDate param) {
+        return withParam((paramIndex) -> execute(() -> preparedStatement.setDate(paramIndex, Date.valueOf(param))));
     }
 
     public void executeUpdate() {

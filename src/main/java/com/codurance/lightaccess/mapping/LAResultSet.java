@@ -2,12 +2,13 @@ package com.codurance.lightaccess.mapping;
 
 import com.codurance.lightaccess.executables.Throwables;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -28,8 +29,12 @@ public class LAResultSet {
         return Throwables.executeQuery(() -> resultSet.getString(columnIndex));
     }
 
+    public LocalDate getLocalDate(int columnIndex) {
+        return getDate(columnIndex).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+    }
+
     public Date getDate(int columnIndex) {
-        return Throwables.executeQuery(() -> resultSet.getDate(columnIndex));
+        return Throwables.executeQuery(() -> new Date(resultSet.getDate(columnIndex).getTime()));
     }
 
     public Optional<LocalDate> getOptionalDate(int columnIndex) {
