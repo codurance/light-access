@@ -4,11 +4,15 @@ import com.codurance.lightaccess.mapping.KeyValue;
 import com.codurance.lightaccess.mapping.OneToMany;
 import org.junit.Before;
 import org.junit.Test;
-import java.util.*;
 
-import static java.util.Arrays.*;
-import static java.util.Collections.*;
-import static java.util.Optional.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.IsEqual.equalTo;

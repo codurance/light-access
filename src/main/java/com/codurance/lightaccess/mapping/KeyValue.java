@@ -22,7 +22,6 @@ public class KeyValue<K, V> implements Map.Entry {
         return value;
     }
 
-
     /**
      * I would rather have this class immutable but this method
      * had to be implemented because of the Map.Entry interface.
@@ -31,8 +30,6 @@ public class KeyValue<K, V> implements Map.Entry {
      */
     @Override
     public Object setValue(Object value) {
-        V oldValue = (V) this.value;
-        this.value = (V) value;
-        return oldValue;
+        throw new UnsupportedOperationException();
     }
 }
