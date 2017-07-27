@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.function.Function;
 
 import static com.codurance.lightaccess.executables.Throwables.executeWithResource;
+import static java.lang.String.format;
 
 public class LightAccess {
 
@@ -42,7 +43,7 @@ public class LightAccess {
     }
 
     private int sequenceNextId(String sequenceName, LAConnection conn) throws SQLException {
-        CallableStatement cs = conn.prepareCall("select nextval('" + sequenceName + "')");
+        CallableStatement cs = conn.prepareCall(format("select nextval('%s')", sequenceName));
         ResultSet resultSet = cs.executeQuery();
         resultSet.next();
         return resultSet.getInt(1);
