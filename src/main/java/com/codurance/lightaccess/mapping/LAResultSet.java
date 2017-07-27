@@ -68,6 +68,11 @@ public class LAResultSet {
         return oneToMany;
     }
 
+    public LAResultSet nextRecord() {
+        next();
+        return this;
+    }
+
     private boolean next() {
         return Throwables.executeQuery(() -> resultSet.next());
     }

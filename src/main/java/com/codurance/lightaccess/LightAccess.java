@@ -4,8 +4,6 @@ import com.codurance.lightaccess.connection.LAConnection;
 import com.codurance.lightaccess.executables.*;
 
 import javax.sql.DataSource;
-import java.sql.CallableStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.function.Function;
 
@@ -14,6 +12,8 @@ import static java.lang.String.format;
 
 public class LightAccess {
 
+    private static final String SEQUENCE_CALL_SQL = "select nextval('%s')";
+    
     private DataSource ds;
 
     public LightAccess(DataSource connection) {
@@ -43,10 +43,11 @@ public class LightAccess {
     }
 
     private int sequenceNextId(String sequenceName, LAConnection conn) throws SQLException {
-        CallableStatement cs = conn.prepareCall(format("select nextval('%s')", sequenceName));
-        ResultSet resultSet = cs.executeQuery();
-        resultSet.next();
-        return resultSet.getInt(1);
+        String sql = format(SEQUENCE_CALL_SQL, sequenceName);
+        return conn.callableStatement(sql)
+                    .executeQuery()
+                    .nextRecord()
+                    .getInt(1);
     }
 
     private void execute(Command command) {
