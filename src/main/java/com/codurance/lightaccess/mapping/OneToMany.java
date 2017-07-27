@@ -3,6 +3,9 @@ package com.codurance.lightaccess.mapping;
 import java.util.*;
 import java.util.function.BiFunction;
 
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+
 public class OneToMany<K, V> {
 
     private Map<K, List<V>> data = new HashMap<>();
@@ -28,5 +31,22 @@ public class OneToMany<K, V> {
             children.add(value.get());
         }
         data.put(key, children);
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        return reflectionEquals(this, other);
+    }
+
+    @Override
+    public int hashCode() {
+        return reflectionHashCode(this);
+    }
+
+    @Override
+    public String toString() {
+        return "OneToMany{" +
+                "data=" + data +
+                '}';
     }
 }
