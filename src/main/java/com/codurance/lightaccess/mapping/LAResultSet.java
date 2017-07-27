@@ -1,16 +1,13 @@
 package com.codurance.lightaccess.mapping;
 
-import com.codurance.lightaccess.executables.Throwables;
-
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
+
+import static com.codurance.lightaccess.executables.Throwables.executeQuery;
 
 public class LAResultSet {
     private final SimpleDateFormat YYYY_MM_DD_date_format = new SimpleDateFormat("yyyy-MM-dd");
@@ -21,27 +18,27 @@ public class LAResultSet {
     }
 
     public int getInt(int columnIndex) {
-        return Throwables.executeQuery(() -> resultSet.getInt(columnIndex));
+        return executeQuery(() -> resultSet.getInt(columnIndex));
     }
 
     public String getString(int columnIndex) {
-        return Throwables.executeQuery(() -> resultSet.getString(columnIndex));
-    }
-
-    public Date getDate(int columnIndex) {
-        return Throwables.executeQuery(() -> resultSet.getDate(columnIndex));
-    }
-
-    public Optional<LocalDate> getOptionalDate(int columnIndex) {
-        Date value = getDate(columnIndex);
-        return (value != null)
-                ? Optional.of(LocalDate.parse(YYYY_MM_DD_date_format.format(value)))
-                : Optional.empty();
+        return executeQuery(() -> resultSet.getString(columnIndex));
     }
 
     public Optional<String> getOptionalString(int columnIndex) {
-        String value = getString(columnIndex);
-        return (value != null) ? Optional.of(value) : Optional.empty();
+        return Optional.ofNullable(getString(columnIndex));
+    }
+
+    public LocalDate getLocalDate(int columnIndex) {
+        return utilDateToLocalDate(getDate(columnIndex));
+    }
+
+    public Date getDate(int columnIndex) {
+        return executeQuery(() -> sqlDateToUtilDate(columnIndex));
+    }
+
+    public Optional<LocalDate> getOptionalLocalDate(int columnIndex) {
+        return Optional.ofNullable(getLocalDate(columnIndex));
     }
 
     public <T> Optional<T> onlyResult(Function<LAResultSet, T> mapOne) throws SQLException {
@@ -74,6 +71,16 @@ public class LAResultSet {
     }
 
     private boolean next() {
-        return Throwables.executeQuery(() -> resultSet.next());
+        return executeQuery(() -> resultSet.next());
     }
+
+    private Date sqlDateToUtilDate(int columnIndex) throws SQLException {
+        java.sql.Date date = resultSet.getDate(columnIndex);
+        return (date != null) ? new Date(date.getTime()) : null;
+    }
+
+    private LocalDate utilDateToLocalDate(Date date) {
+        return (date != null) ? LocalDate.parse(YYYY_MM_DD_date_format.format(date)) : null;
+    }
+
 }
