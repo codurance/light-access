@@ -51,8 +51,8 @@ public class LightAccess {
     }
 
     private void execute(Command command) {
-        LAConnection c = pgConnection();
-        executeWithResource(c, () -> command.execute(c));
+        LAConnection conn = pgConnection();
+        executeWithResource(conn, () -> command.execute(conn));
     }
 
     private LAConnection pgConnection() {
