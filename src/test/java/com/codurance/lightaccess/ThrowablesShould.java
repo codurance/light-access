@@ -10,116 +10,154 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 
 public class ThrowablesShould {
 
     private final Throwables throwables = new Throwables();
-    @Rule
-    public MockitoRule mockito = MockitoJUnit.rule();
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Rule public MockitoRule mockito = MockitoJUnit.rule();
 
-    @Mock
-    private Command command;
+    @Rule public ExpectedException expectedException = ExpectedException.none();
 
-    @Mock
-    private Throwables.Query query;
+    @Mock Command command;
+    @Mock Throwables.Query query;
+    @Mock AutoCloseable resource;
 
-    @Test
-    public void executeCommand() throws Exception {
-        throwables.execute(command);
+    @Test public void
+    execute_command() throws Exception {
+        Throwables.execute(command);
 
         verify(command).execute();
     }
 
-    @Test
-    public void throwsRuntimeExceptionThrownByCommand() throws Exception {
-        doThrow(new RuntimeException("I throw runtimeException")).when(command).execute();
+    @Test public void
+    throws_command_runtime_exception() throws Exception {
+        doThrow(new DummyRuntimeException("exception message")).when(command).execute();
+
+        expectedException.expect(DummyRuntimeException.class);
+        expectedException.expectMessage(is("exception message"));
+
+        Throwables.execute(command);
+    }
+
+    @Test public void
+    wraps_checked_exception_thrown_by_command_with_runtime_wrapper() throws Exception {
+        DummyCheckedException dummyCheckedException = new DummyCheckedException();
+        doThrow(dummyCheckedException).when(command).execute();
+
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(is("I throw runtimeException"));
+        expectedException.expectCause(is(dummyCheckedException));
 
-        throwables.execute(command);
+        Throwables.execute(command);
     }
 
-    @Test
-    public void wrapsCheckedExceptionThrownByCommandWithRuntimeException() throws Exception {
-        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
-        doThrow(exceptionThrownByCommand).when(command).execute();
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectCause(is(exceptionThrownByCommand));
+    @Test public void
+    wraps_runtime_checked_exception_thrown_by_command_with_another_checked_exception() throws Exception {
+        Exception commandException = new Exception();
+        doThrow(commandException).when(command).execute();
 
-        throwables.execute(command);
+        expectedException.expect(DummyCheckedException.class);
+        expectedException.expectCause(is(commandException));
+
+        Throwables.execute(command, DummyCheckedException::new);
     }
 
-    @Test
-    public void throwsRuntimeExceptionThrownByCommandWithoutWrapping() throws Exception {
-        doThrow(new RuntimeException("I throw runtimeException")).when(command).execute();
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(is("I throw runtimeException"));
-
-        throwables.execute(command, null);
-    }
-
-    @Test
-    public void wrapsCheckedExceptionThrownByCommandWithExceptionDefinedByWrapper() throws Exception {
-        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
-        doThrow(exceptionThrownByCommand).when(command).execute();
-        expectedException.expect(TestException.class);
-        expectedException.expectCause(is(exceptionThrownByCommand));
-
-        throwables.execute(command, TestException::new);
-    }
-
-    @Test
-    public void executeQuery() throws Exception {
-        throwables.executeQuery(query);
+    @Test public void
+    execute_query() throws Exception {
+        Throwables.executeQuery(query);
 
         verify(query).call();
     }
 
-    @Test
-    public void throwsRuntimeExceptionThrownByQuery() throws Exception {
-        doThrow(new RuntimeException("I throw runtimeException")).when(query).call();
+    @Test public void
+    throws_query_runtime_exception() throws Exception {
+        doThrow(new DummyRuntimeException("exception message")).when(query).call();
+
+        expectedException.expect(DummyRuntimeException.class);
+        expectedException.expectMessage(is("exception message"));
+
+        Throwables.executeQuery(query);
+    }
+
+    @Test public void
+    wraps_checked_exception_thrown_by_query_with_runtime_wrapper() throws Exception {
+        DummyCheckedException dummyCheckedException = new DummyCheckedException();
+        doThrow(dummyCheckedException).when(query).call();
+
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(is("I throw runtimeException"));
+        expectedException.expectCause(is(dummyCheckedException));
 
-        throwables.executeQuery(query);
+        Throwables.executeQuery(query);
     }
 
-    @Test
-    public void wrapsCheckedExceptionThrownByQueryWithRuntimeException() throws Exception {
-        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
-        doThrow(exceptionThrownByCommand).when(query).call();
+    @Test public void
+    wraps_runtime_checked_exception_thrown_by_query_with_another_checked_exception() throws Exception {
+        Exception queryException = new Exception();
+        doThrow(queryException).when(query).call();
+
+        expectedException.expect(DummyCheckedException.class);
+        expectedException.expectCause(is(queryException));
+
+        Throwables.executeQuery(query, DummyCheckedException::new);
+    }
+
+    @Test public void
+    close_resource_when_executing_a_command() throws Exception {
+        Throwables.executeWithResource(resource, command);
+        
+        verify(resource).close();
+    }
+
+    @Test public void
+    close_resource_even_when_a_command_throws_exception() throws Exception {
+        DummyCheckedException commandException = new DummyCheckedException();
+        doThrow(commandException).when(command).execute();
+
         expectedException.expect(RuntimeException.class);
-        expectedException.expectCause(is(exceptionThrownByCommand));
+        expectedException.expectCause(is(commandException));
+        
+        Throwables.executeWithResource(resource, command);
 
-        throwables.executeQuery(query);
+        verify(resource).close();
     }
 
-    @Test
-    public void throwsRuntimeExceptionThrownByQueryWithoutWrapping() throws Exception {
-        doThrow(new RuntimeException("I throw runtimeException")).when(query).call();
+    @Test public void
+    close_resource_when_executing_a_query() throws Exception {
+        Throwables.executeWithResource(resource, query);
+
+        verify(resource).close();
+    }
+
+    @Test public void
+    close_resource_even_when_a_query_throws_exception() throws Exception {
+        DummyCheckedException queryException = new DummyCheckedException();
+        doThrow(queryException).when(query).call();
+
         expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage(is("I throw runtimeException"));
+        expectedException.expectCause(is(queryException));
 
-        throwables.executeQuery(query, null);
+        Throwables.executeWithResource(resource, query);
+
+        verify(resource).close();
     }
 
-    @Test
-    public void wrapsCheckedExceptionThrownByQueryWithExceptionDefinedByWrapper() throws Exception {
-        Exception exceptionThrownByCommand = new Exception("I throw checked exception");
-        doThrow(exceptionThrownByCommand).when(query).call();
-        expectedException.expect(TestException.class);
-        expectedException.expectCause(is(exceptionThrownByCommand));
-
-        throwables.executeQuery(query, TestException::new);
-    }
-
-    private class TestException extends Exception {
-        public TestException(Exception e) {
-            super(e);
+    private class DummyRuntimeException extends RuntimeException {
+        DummyRuntimeException(String message) {
+            super(message);
         }
     }
+
+    private class DummyCheckedException extends Exception {
+        DummyCheckedException(Exception e) {
+            super(e);
+        }
+
+        DummyCheckedException() {
+            super();
+        }
+    }
+
+
 }
