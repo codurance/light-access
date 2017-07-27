@@ -20,16 +20,13 @@ public class OneToMany<K, V> {
 
     public <T> List<T> collect(BiFunction<K, List<V>, T> collect) {
         List<T> list = new ArrayList<>();
-        data.entrySet().forEach(
-                e -> list.add(collect.apply(e.getKey(), e.getValue())));
+        data.forEach((key, value) -> list.add(collect.apply(key, value)));
         return list;
     }
 
     private void put(K key, Optional<V> value) {
         List<V> children = data.getOrDefault(key, new ArrayList<>());
-        if (value.isPresent()) {
-            children.add(value.get());
-        }
+        value.ifPresent(children::add);
         data.put(key, children);
     }
 
@@ -41,12 +38,5 @@ public class OneToMany<K, V> {
     @Override
     public int hashCode() {
         return reflectionHashCode(this);
-    }
-
-    @Override
-    public String toString() {
-        return "OneToMany{" +
-                "data=" + data +
-                '}';
     }
 }
