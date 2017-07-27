@@ -6,8 +6,6 @@ import com.codurance.lightaccess.mapping.LAResultSet;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 
-import static com.codurance.lightaccess.executables.Throwables.executeQuery;
-
 public class CallableStatementBuilder {
 
     private CallableStatement callableStatement;

@@ -18,7 +18,6 @@ public class Throwables {
         E wrap(Exception e);
     }
 
-    //TODO Rename execute and executeQuery to "try"
     public static void execute(Command command) throws RuntimeException {
         execute(command, RuntimeException::new);
     }

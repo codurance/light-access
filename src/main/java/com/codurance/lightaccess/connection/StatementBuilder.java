@@ -3,8 +3,9 @@ package com.codurance.lightaccess.connection;
 import com.codurance.lightaccess.executables.Throwables;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
+
+import static com.codurance.lightaccess.executables.Throwables.executeWithResource;
 
 public class StatementBuilder {
 
@@ -17,11 +18,6 @@ public class StatementBuilder {
     }
 
     public void execute() {
-        try {
-            statement.execute(sql);
-            statement.close();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        executeWithResource(statement, () -> statement.execute(sql));
     }
 }
