@@ -163,9 +163,9 @@ public class LightAccessIntegrationTest {
 
     private SQLCommand insert(Entity entity) {
         return conn -> conn.prepareStatement(INSERT_ENTITY_SQL)
-                                                .withParam(entity.id)
-                                                .withParam(entity.name)
-                                                .executeUpdate();
+                            .withParam(entity.id)
+                            .withParam(entity.name)
+                            .executeUpdate();
     }
 
     private SQLQuery<Optional<Entity>> retrieveEntityWithId(int id) {
