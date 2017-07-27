@@ -6,6 +6,7 @@ import com.codurance.lightaccess.executables.*;
 import javax.sql.DataSource;
 import java.sql.CallableStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.function.Function;
 
 import static com.codurance.lightaccess.executables.Throwables.executeWithResource;
@@ -37,12 +38,14 @@ public class LightAccess {
 
     public <T> T nextId(String sequenceName, Function<Integer, T> nextId) {
         LAConnection conn = pgConnection();
-        return executeWithResource(conn, () -> {
-            CallableStatement cs = conn.prepareCall("select nextval('" + sequenceName + "')");
-            ResultSet resultSet = cs.executeQuery();
-            resultSet.next();
-            return nextId.apply(resultSet.getInt(1));
-        });
+        return executeWithResource(conn, () -> nextId.apply(sequenceNextId(sequenceName, conn)));
+    }
+
+    private int sequenceNextId(String sequenceName, LAConnection conn) throws SQLException {
+        CallableStatement cs = conn.prepareCall("select nextval('" + sequenceName + "')");
+        ResultSet resultSet = cs.executeQuery();
+        resultSet.next();
+        return resultSet.getInt(1);
     }
 
     private void execute(Command command) {
