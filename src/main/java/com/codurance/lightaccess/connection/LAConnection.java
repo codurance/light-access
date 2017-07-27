@@ -1,9 +1,6 @@
 package com.codurance.lightaccess.connection;
 
-import java.sql.CallableStatement;
 import java.sql.Connection;
-
-import static com.codurance.lightaccess.executables.Throwables.executeQuery;
 
 public class LAConnection implements AutoCloseable {
 
@@ -34,17 +31,12 @@ public class LAConnection implements AutoCloseable {
         return new StatementBuilder(connection, ddl);
     }
 
-
     /**
      * Used for invoking stored procedures and sequences.
      *
      * @param sql SQL statement for calling stored procedures or sequences.
      * @return
      */
-    public CallableStatement prepareCall(String sql) {
-        return executeQuery(() -> connection.prepareCall(sql));
-    }
-
     public CallableStatementBuilder callableStatement(String sql) {
         return new CallableStatementBuilder(connection, sql);
     }

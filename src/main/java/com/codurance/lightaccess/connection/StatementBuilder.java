@@ -1,20 +1,18 @@
 package com.codurance.lightaccess.connection;
 
+import com.codurance.lightaccess.executables.Throwables;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
 public class StatementBuilder {
 
-    private final Statement statement;
-    private final String sql;
+    private Statement statement;
+    private String sql;
 
     StatementBuilder(Connection connection, String sql) {
-        try {
-            this.statement = connection.createStatement();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        Throwables.execute(() -> this.statement = connection.createStatement());
         this.sql = sql;
     }
 
