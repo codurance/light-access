@@ -1,6 +1,5 @@
-package com.codurance.lightaccess;
+package com.codurance.lightaccess.executables;
 
-import com.codurance.lightaccess.executables.Throwables;
 import com.codurance.lightaccess.executables.Throwables.Command;
 import org.junit.Rule;
 import org.junit.Test;
