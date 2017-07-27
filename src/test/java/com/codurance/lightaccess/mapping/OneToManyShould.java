@@ -1,102 +1,105 @@
 package com.codurance.lightaccess.mapping;
 
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
+import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OneToManyShould {
 
-    private static final String KEY_WITHOUT_VALUES = "Key without value";
-    private static final String KEY_WITH_SINGLE_VALUE = "Key with single value";
-    private static final String KEY_WITH_MULTIPLE_VALUES = "Key with multiple value";
-    private static final String SOME_VALUE = "Value 1";
-    private static final String SOME_OTHER_VALUE = "Value 2";
-    private OneToMany<String, String> oneToMany;
+    private static final Company COMPANY_1 = new Company(1, "Company 1");
+    private static final Company COMPANY_2 = new Company(2, "Company 2");
+    private static final Company COMPANY_3 = new Company(2, "Company 3");
 
-    @Before
-    public void setup() {
-        oneToMany = new OneToMany<>();
+    private static final Contact JOHN  = new Contact(10, "John");
+    private static final Contact BRIAN = new Contact(10, "Brian");
+    private static final Contact SALLY = new Contact(10, "Sally");
+
+
+    @Test public void
+    collect_data_into_a_list_of_objects_containing_key_and_values() {
+        OneToMany<Company, Contact> oneToMany = new OneToMany<>();
+        oneToMany.put(COMPANY_1, Optional.of(JOHN));
+        oneToMany.put(COMPANY_1, Optional.of(BRIAN));
+        oneToMany.put(COMPANY_2, Optional.of(SALLY));
+        oneToMany.put(COMPANY_3, Optional.empty());
+
+        List<CompanyWithContacts> companyWithContacts = oneToMany.collect(CompanyWithContacts::new);
+
+        assertThat(companyWithContacts).containsExactlyInAnyOrder(
+                new CompanyWithContacts(COMPANY_1, JOHN, BRIAN),
+                new CompanyWithContacts(COMPANY_2, SALLY),
+                new CompanyWithContacts(COMPANY_3));
     }
 
-    @Test
-    public void collectMappedValuesGroupedByKey() throws Exception {
-        oneToMany.put(new KeyValue<>(KEY_WITH_MULTIPLE_VALUES, of(SOME_VALUE)));
-        oneToMany.put(new KeyValue<>(KEY_WITH_MULTIPLE_VALUES, of(SOME_OTHER_VALUE)));
-        oneToMany.put(new KeyValue<>(KEY_WITH_SINGLE_VALUE, of(SOME_VALUE)));
+    static class Company  {
+        private final Integer id;
+        private final String name;
 
-        assertThat(oneToMany.collect(MappedKeyValues::new),
-                containsInAnyOrder(
-                        new MappedKeyValues(KEY_WITH_MULTIPLE_VALUES, asList(SOME_VALUE, SOME_OTHER_VALUE)),
-                        new MappedKeyValues(KEY_WITH_SINGLE_VALUE, singletonList(SOME_VALUE))));
-    }
-
-    @Test
-    public void collectEmptyMappedValuesWhenAllKeyValuePairsForGivenKeyHaveEmptyValues() throws Exception {
-        oneToMany.put(new KeyValue<>(KEY_WITHOUT_VALUES, empty()));
-
-        assertThat(oneToMany.collect(MappedKeyValues::new),
-                equalTo(singletonList(new MappedKeyValues(KEY_WITHOUT_VALUES, emptyList()))));
-    }
-
-    @Test
-    public void collectMappedValuesOnlyForKeyValuePairsWithNonEmptyValues() throws Exception {
-        oneToMany.put(new KeyValue<>(KEY_WITH_SINGLE_VALUE, of(SOME_VALUE)));
-        oneToMany.put(new KeyValue<>(KEY_WITH_SINGLE_VALUE, empty()));
-
-        assertThat(oneToMany.collect(MappedKeyValues::new),
-                equalTo(singletonList(new MappedKeyValues(KEY_WITH_SINGLE_VALUE, singletonList(SOME_VALUE)))));
-    }
-
-    @Test
-    public void returnEmptyMappedValuesWhenThereIsNoMappedValue() throws Exception {
-        assertThat(oneToMany.collect(MappedKeyValues::new),
-                equalTo(new ArrayList<>()));
-    }
-
-    private static class MappedKeyValues {
-        String key;
-        List<String> values;
-
-        MappedKeyValues(String key, List<String> values) {
-            this.key = key;
-            this.values = values;
+        Company(Integer id, String name) {
+            this.id = id;
+            this.name = name;
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            MappedKeyValues tuple = (MappedKeyValues) o;
-
-            if (key != null ? !key.equals(tuple.key) : tuple.key != null) return false;
-            return values != null ? values.equals(tuple.values) : tuple.values == null;
+        public boolean equals(Object other) {
+            return reflectionEquals(this, other);
         }
 
         @Override
         public int hashCode() {
-            int result = key != null ? key.hashCode() : 0;
-            result = 31 * result + (values != null ? values.hashCode() : 0);
-            return result;
+            return reflectionHashCode(this);
+        }
+    }
+
+    static class Contact {
+        private final Integer id;
+        private final String name;
+
+        Contact(Integer id, String name) {
+            this.id = id;
+            this.name = name;
         }
 
         @Override
-        public String toString() {
-            return "MappedKeyValues{" +
-                    "key='" + key + '\'' +
-                    ", values=" + values +
-                    '}';
+        public boolean equals(Object other) {
+            return reflectionEquals(this, other);
+        }
+
+        @Override
+        public int hashCode() {
+            return reflectionHashCode(this);
         }
     }
+
+    static class CompanyWithContacts {
+        private Company company;
+        private List<Contact> contacts = new ArrayList<>();
+
+        CompanyWithContacts(Company company, Contact... contacts) {
+            this(company, asList(contacts));
+        }
+
+        CompanyWithContacts(Company company, List<Contact> contacts) {
+            this.company = company;
+            this.contacts = contacts;
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            return reflectionEquals(this, other);
+        }
+
+        @Override
+        public int hashCode() {
+            return reflectionHashCode(this);
+        }
+    }
+
 }

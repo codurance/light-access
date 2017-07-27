@@ -23,8 +23,8 @@ public class KeyValue<K, V> implements Map.Entry {
     }
 
     /**
-     * I would rather have this class immutable but this method
-     * had to be implemented because of the Map.Entry interface.
+     * This class should be immutable but this method has to be
+     * implemented because of the Map.Entry interface.
      *
      * @see java.util.Map.Entry#setValue(Object)
      */
