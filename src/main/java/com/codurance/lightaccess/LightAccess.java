@@ -15,7 +15,7 @@ public class LightAccess {
     private static final String SEQUENCE_CALL_SQL = "select nextval('%s')";
     
     private DataSource ds;
-
+                                                     
     public LightAccess(DataSource connection) {
         this.ds = connection;
     }
@@ -51,8 +51,8 @@ public class LightAccess {
     }
 
     private void execute(Command command) {
-        LAConnection c = pgConnection();
-        executeWithResource(c, () -> command.execute(c));
+        LAConnection conn = pgConnection();
+        executeWithResource(conn, () -> command.execute(conn));
     }
 
     private LAConnection pgConnection() {
