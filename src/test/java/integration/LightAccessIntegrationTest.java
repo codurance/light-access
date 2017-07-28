@@ -23,22 +23,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class LightAccessIntegrationTest {
 
-    private static final String CREATE_ENTITIES_TABLE = "CREATE TABLE entities (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+    private static final String CREATE_PRODUCTS_TABLE = "CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
     private static final String CREATE_SEQUENCE_DDL = "CREATE SEQUENCE %s START WITH %s";
     private static final String DROP_ALL_OBJECTS = "DROP ALL OBJECTS";
 
-    private static final String INSERT_ENTITY_SQL = "insert into entities (id, name, date) values (?, ?, ?)";
-    private static final String DELETE_ENTITIES_SQL = "delete from entities";
-    private static final String DELETE_ENTITY_SQL = "delete from entities where id = ?";
-    private static final String UPDATE_ENTITY_NAME_SQL = "update entities set name = ? where id = ?";
-    private static final String SELECT_ALL_ENTITIES_SQL = "select * from entities";
-    private static final String SELECT_ENTITY_BY_ID_SQL = "select * from entities where id = ?";
+    private static final String INSERT_PRODUCT_SQL = "insert into products (id, name, date) values (?, ?, ?)";
+    private static final String DELETE_PRODUCTS_SQL = "delete from products";
+    private static final String DELETE_PRODUCT_SQL = "delete from products where id = ?";
+    private static final String UPDATE_PRODUCT_NAME_SQL = "update products set name = ? where id = ?";
+    private static final String SELECT_ALL_PRODUCTS_SQL = "select * from products";
+    private static final String SELECT_PRODUCT_BY_ID_SQL = "select * from products where id = ?";
 
     private static final LocalDate TODAY = LocalDate.of(2017, 07, 27);
     private static final LocalDate YESTERDAY = LocalDate.of(2017, 07, 26);
 
-    private static Entity ENTITY_ONE = new Entity(1, "Entity 1", YESTERDAY);
-    private static Entity ENTITY_TWO = new Entity(2, "Entity 2", TODAY);
+    private static Product PRODUCT_ONE = new Product(1, "Product 1", YESTERDAY);
+    private static Product PRODUCT_TWO = new Product(2, "Product 2", TODAY);
 
     private static LightAccess lightAccess;
     private static JdbcConnectionPool jdbcConnectionPool;
@@ -51,7 +51,7 @@ public class LightAccessIntegrationTest {
 
     @Before
     public void before_each_test() throws Exception {
-        lightAccess.executeDDLCommand(createEntitiesTable());
+        lightAccess.executeDDLCommand(createProductsTable());
     }
 
     @After
@@ -61,14 +61,14 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     close_connection_after_executing_a_query() {
-        lightAccess.executeQuery((conn) -> SELECT_ALL_ENTITIES_SQL);
+        lightAccess.executeQuery((conn) -> SELECT_ALL_PRODUCTS_SQL);
 
         assertThat(jdbcConnectionPool.getActiveConnections()).isEqualTo(0);
     }
 
     @Test public void
     close_connection_after_executing_a_command() {
-        lightAccess.executeCommand(deleteEntities());
+        lightAccess.executeCommand(deleteProducts());
 
         assertThat(jdbcConnectionPool.getActiveConnections()).isEqualTo(0);
     }
@@ -81,57 +81,57 @@ public class LightAccessIntegrationTest {
     }
 
     @Test public void
-    create_and_retrieve_entities() {
-        lightAccess.executeCommand(insert(ENTITY_ONE));
-        lightAccess.executeCommand(insert(ENTITY_TWO));
+    insert_records() {
+        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(insert(PRODUCT_TWO));
 
-        List<Entity> entities = lightAccess.executeQuery(retrieveAllEntities());
+        List<Product> products = lightAccess.executeQuery(retrieveAllProducts());
 
-        assertThat(entities).containsExactlyInAnyOrder(ENTITY_ONE, ENTITY_TWO);
+        assertThat(products).containsExactlyInAnyOrder(PRODUCT_ONE, PRODUCT_TWO);
     }
 
     @Test public void
-    retrieve_a_single_entity() {
-        lightAccess.executeCommand(insert(ENTITY_ONE));
-        lightAccess.executeCommand(insert(ENTITY_TWO));
+    retrieve_a_single_record_and_map_it_to_an_object() {
+        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(insert(PRODUCT_TWO));
 
-        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_TWO.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id));
 
-        assertThat(entity.get()).isEqualTo(ENTITY_TWO);
+        assertThat(product.get()).isEqualTo(PRODUCT_TWO);
     }
 
     @Test public void
-    retrieve_an_empty_optional_when_entity_is_not_found() {
-        lightAccess.executeCommand(insert(ENTITY_ONE));
+    retrieve_an_empty_optional_when_not_record_is_found() {
+        lightAccess.executeCommand(insert(PRODUCT_ONE));
 
-        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_TWO.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id));
 
-        assertThat(entity.isPresent()).isEqualTo(false);
+        assertThat(product.isPresent()).isEqualTo(false);
     }
 
     @Test public void
-    delete_entity() {
-        lightAccess.executeCommand(insert(ENTITY_ONE));
-        lightAccess.executeCommand(insert(ENTITY_TWO));
+    delete_a_record() {
+        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(insert(PRODUCT_TWO));
 
-        lightAccess.executeCommand(delete(ENTITY_ONE));
+        lightAccess.executeCommand(delete(PRODUCT_ONE));
 
-        List<Entity> entities = lightAccess.executeQuery(retrieveAllEntities());
-        assertThat(entities).containsExactlyInAnyOrder(ENTITY_TWO);
+        List<Product> products = lightAccess.executeQuery(retrieveAllProducts());
+        assertThat(products).containsExactlyInAnyOrder(PRODUCT_TWO);
     }
 
     @Test public void
-    update_entity() {
-        lightAccess.executeCommand(insert(ENTITY_ONE));
-        lightAccess.executeCommand(updateEntityName(1, "Another name"));
+    update_a_record() {
+        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(updateProductName(1, "Another name"));
 
-        Optional<Entity> entity = lightAccess.executeQuery(retrieveEntityWithId(ENTITY_ONE.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_ONE.id));
 
-        assertThat(entity.get()).isEqualTo(new Entity(ENTITY_ONE.id, "Another name", ENTITY_ONE.date));
+        assertThat(product.get()).isEqualTo(new Product(PRODUCT_ONE.id, "Another name", PRODUCT_ONE.date));
     }
 
-    @Test
-    public void return_next_integer_id_using_sequence() throws Exception {
+    @Test public void
+    return_next_integer_id_using_sequence() throws Exception {
         lightAccess.executeDDLCommand(createSequence("id_sequence", "10"));
 
         int firstId = lightAccess.nextId("id_sequence");
@@ -141,57 +141,57 @@ public class LightAccessIntegrationTest {
         assertThat(secondId).isEqualTo(11);
     }
 
-    @Test
-    public void return_next_id_converted_to_a_different_type() throws Exception {
+    @Test public void
+    return_next_id_converted_to_a_different_type() throws Exception {
         lightAccess.executeDDLCommand(createSequence("id_sequence", "10"));
 
         String firstId = lightAccess.nextId("id_sequence", Object::toString);
-        EntityID secondId = lightAccess.nextId("id_sequence", EntityID::new);
+        ProductID secondId = lightAccess.nextId("id_sequence", ProductID::new);
 
         assertThat(firstId).isEqualTo("10");
-        assertThat(secondId).isEqualTo(new EntityID(11));
+        assertThat(secondId).isEqualTo(new ProductID(11));
     }
 
-    private SQLCommand updateEntityName(int id, String name) {
-        return conn -> conn.prepareStatement(UPDATE_ENTITY_NAME_SQL)
+    private SQLCommand updateProductName(int id, String name) {
+        return conn -> conn.prepareStatement(UPDATE_PRODUCT_NAME_SQL)
                             .withParam(name)
                             .withParam(id)
                             .executeUpdate();
     }
 
-    private SQLCommand delete(Entity entity) {
-        return conn -> conn.prepareStatement(DELETE_ENTITY_SQL)
-                            .withParam(entity.id)
+    private SQLCommand delete(Product product) {
+        return conn -> conn.prepareStatement(DELETE_PRODUCT_SQL)
+                            .withParam(product.id)
                             .executeUpdate();
     }
 
-    private SQLCommand insert(Entity entity) {
-        return conn -> conn.prepareStatement(INSERT_ENTITY_SQL)
-                            .withParam(entity.id)
-                            .withParam(entity.name)
-                            .withParam(entity.date)
+    private SQLCommand insert(Product product) {
+        return conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
+                            .withParam(product.id)
+                            .withParam(product.name)
+                            .withParam(product.date)
                             .executeUpdate();
     }
 
-    private SQLQuery<Optional<Entity>> retrieveEntityWithId(int id) {
-        return conn -> conn.prepareStatement(SELECT_ENTITY_BY_ID_SQL)
+    private SQLQuery<Optional<Product>> retrieveProductWithId(int id) {
+        return conn -> conn.prepareStatement(SELECT_PRODUCT_BY_ID_SQL)
                             .withParam(id)
                             .executeQuery()
-                            .onlyResult(this::toEntity);
+                            .onlyResult(this::toProduct);
     }
 
-    private SQLQuery<List<Entity>> retrieveAllEntities() {
-        return conn -> conn.prepareStatement(SELECT_ALL_ENTITIES_SQL)
+    private SQLQuery<List<Product>> retrieveAllProducts() {
+        return conn -> conn.prepareStatement(SELECT_ALL_PRODUCTS_SQL)
                             .executeQuery()
-                            .mapResults(this::toEntity);
+                            .mapResults(this::toProduct);
     }
 
-    private SQLCommand deleteEntities() {
-        return conn -> conn.prepareStatement(DELETE_ENTITIES_SQL).executeUpdate();
+    private SQLCommand deleteProducts() {
+        return conn -> conn.prepareStatement(DELETE_PRODUCTS_SQL).executeUpdate();
     }
 
-    private Entity toEntity(LAResultSet laResultSet) {
-        return new Entity(laResultSet.getInt(1),
+    private Product toProduct(LAResultSet laResultSet) {
+        return new Product(laResultSet.getInt(1),
                           laResultSet.getString(2),
                           laResultSet.getLocalDate(3));
     }
@@ -201,20 +201,20 @@ public class LightAccessIntegrationTest {
         return (conn) -> conn.statement(id_sequence).execute();
     }
 
-    private DDLCommand createEntitiesTable() {
-        return (conn) -> conn.statement(CREATE_ENTITIES_TABLE).execute();
+    private DDLCommand createProductsTable() {
+        return (conn) -> conn.statement(CREATE_PRODUCTS_TABLE).execute();
     }
 
     private DDLCommand dropAllObjects() {
         return (conn) -> conn.statement(DROP_ALL_OBJECTS).execute();
     }
     
-    private static class Entity {
+    private static class Product {
         private int id;
         private String name;
         private LocalDate date;
 
-        Entity(int id, String name, LocalDate date) {
+        Product(int id, String name, LocalDate date) {
             this.id = id;
             this.name = name;
             this.date = date;
@@ -232,7 +232,7 @@ public class LightAccessIntegrationTest {
 
         @Override
         public String toString() {
-            return "Entity{" +
+            return "Product{" +
                     "id=" + id +
                     ", name='" + name + '\'' +
                     ", date=" + date +
@@ -240,10 +240,10 @@ public class LightAccessIntegrationTest {
         }
     }
 
-    private static class EntityID {
+    private static class ProductID {
         private int id;
 
-        EntityID(int id) {
+        ProductID(int id) {
             this.id = id;
         }
 
