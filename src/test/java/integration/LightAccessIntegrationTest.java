@@ -31,7 +31,7 @@ public class LightAccessIntegrationTest {
     private static final String DELETE_PRODUCTS_SQL = "delete from products";
     private static final String DELETE_PRODUCT_SQL = "delete from products where id = ?";
     private static final String UPDATE_PRODUCT_NAME_SQL = "update products set name = ? where id = ?";
-    private static final String SELECT_ALL_PRODUCT_SQL = "select * from products";
+    private static final String SELECT_ALL_PRODUCTS_SQL = "select * from products";
     private static final String SELECT_PRODUCT_BY_ID_SQL = "select * from products where id = ?";
 
     private static final LocalDate TODAY = LocalDate.of(2017, 07, 27);
@@ -61,7 +61,7 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     close_connection_after_executing_a_query() {
-        lightAccess.executeQuery((conn) -> SELECT_ALL_PRODUCT_SQL);
+        lightAccess.executeQuery((conn) -> SELECT_ALL_PRODUCTS_SQL);
 
         assertThat(jdbcConnectionPool.getActiveConnections()).isEqualTo(0);
     }
@@ -181,7 +181,7 @@ public class LightAccessIntegrationTest {
     }
 
     private SQLQuery<List<Product>> retrieveAllProducts() {
-        return conn -> conn.prepareStatement(SELECT_ALL_PRODUCT_SQL)
+        return conn -> conn.prepareStatement(SELECT_ALL_PRODUCTS_SQL)
                             .executeQuery()
                             .mapResults(this::toProduct);
     }

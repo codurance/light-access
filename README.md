@@ -100,7 +100,7 @@ Let's assume we have an object `Product` that we want to map to the `products` t
 Let's take the following select statement.
 
 ```java
-private static final String SELECT_PRODUCT_BY_ID_SQL = "select * from products where id = ?";
+    private static final String SELECT_PRODUCT_BY_ID_SQL = "select * from products where id = ?";
 ```
 
 Now let's create a method that returns a lambda for this select statement. As we are looking for a single entity and 
@@ -132,6 +132,57 @@ Now we only need to execute the select statement.
     Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(10));
 ```
 
+In case you prefer an inline version, you can use:
+
+```java
+    Optional<Product> product = lightAccess.executeQuery(conn -> conn.prepareStatement(SELECT_PRODUCT_BY_ID_SQL)
+                                                                        .withParam(PRODUCT_TWO.id)
+                                                                        .executeQuery()
+                                                                        .onlyResult(this::toProduct));
+```
+
+### Select - multiple results 
+
+Let's take the following select statement:
+
+```java
+    private static final String SELECT_ALL_PRODUCTS_SQL = "select * from products";
+```
+
+Now let's create a method that returns a lambda:
+
+```java
+    private SQLQuery<List<Product>> retrieveAllProducts() {
+        return conn -> conn.prepareStatement(SELECT_ALL_PRODUCTS_SQL)
+                            .executeQuery()
+                            .mapResults(this::toProduct);
+    }
+```
+
+Note that now we are calling `mapResults(this::toProduct)` instead of `onlyResult(this::toProduct)`, and the `SQLQuery` 
+is parameterised to return `List<Product>`.
+
+Now we just need to invoke the query like before. 
+
+```java
+    List<Product> products = lightAccess.executeQuery(retrieveAllProducts());
+```
+
+And in case you prefer the inlined version:
+
+```java
+    List<Product> products = lightAccess.executeQuery(conn -> conn.prepareStatement(SELECT_ALL_PRODUCTS_SQL)
+                                                                    .executeQuery()
+                                                                    .mapResults(this::toProduct));
+```
+
+### Normalising one to many joins
+
+**TODO:** Create an example using Order (1) -> (*) Product. Probably better to have an integration test.
+
+**TODO:** Create an example of collecting it to a different DTO.
+
+### Insert, Delete, and Update   
 
 ## Calling sequences (PostgreSQL / H2)
 
@@ -146,16 +197,26 @@ stored procedures or sequences.
 
 # Further documentation 
 
-Please check the tests for more details in how to use this library.  
+Please check the [tests][?] for more details in how to use this library.  
 
 ### Databases tested
 
-We have only tested this library with Amazon RDS for PostgreSQL. 
+We have only tested this library with [Amazon RDS][?] for [PostgreSQL][?]. 
+
+#### History
+
+This library was first created by [Sandro Mancuso][?] while refactoring and removing duplication from multiple 
+repositories in one of the [Codurance][?]'s internal projects.
 
 [1]: https://docs.oracle.com/javase/tutorial/jdbc/basics/
 [2]: http://link to LightAccess class on github.  
 [3]: link to the repository building block (DDD)
 [4]: link to h2 database. 
+[?]: link to the test package
 [?]: link to JDBC Statement
 [?]: link to JDBC PreparedStatement
 [?]: link to JDBC CallableStatement
+[?]: link to Amazon RDS
+[?]: link to PostgreSQL
+[?]: http://twitter.com/sandromancuso
+[?]: http://codurance.com
