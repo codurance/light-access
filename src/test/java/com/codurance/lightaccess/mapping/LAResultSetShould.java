@@ -226,10 +226,6 @@ public class LAResultSetShould {
         return new java.util.Date(sqlDate.getTime());
     }
 
-    private static LocalDate utilDateToLocalDate(java.util.Date date) {
-        return (date != null) ? LocalDate.parse(YYYY_MM_DD_date_format.format(date)) : null;
-    }
-
     private static java.sql.Date localDateToSqlDate(LocalDate localDate) {
         return Date.valueOf(localDate);
     }
