@@ -26,7 +26,7 @@ This library is for Java developers who:
     2. [Executing multiple DDL commands](#multipleddlstatements)
 4. [DML statements](#dmlstatements)
     1. [Select - single result](#selectsingleresult)
-    2. [Select - multiple results](selectmultipleresults)
+    2. [Select - multiple results](#selectmultipleresults)
     3. [Normalising one to many joins](#onetomanyjoins)    
     4. [Insert](#insert)
     5. [Update](#udpate)
