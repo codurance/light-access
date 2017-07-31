@@ -35,6 +35,7 @@ This library is for Java developers who:
 **TODO:** Add information about group, artifact id, name for Maven and Gradle.  
 
 <a name"start"></a>
+
 # Getting started 
 
 The main class to look at is [LightAccess][2]. We recommend to have this class injected into your [repositories][3]. 
@@ -52,6 +53,7 @@ LightAccess lightAccess = new LightAccess(jdbcConnectionPool);
 ``` 
 
 <a name"ddlstatements"></a>
+
 ## Executing DDL statements 
 
 First let's define a DDL statement which create a table called 'products' with 3 fields. 
