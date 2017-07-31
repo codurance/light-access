@@ -38,15 +38,15 @@ This library is for Java developers who:
 
 
 <a name="installation"></a>
-## Installing Light Access (????) 
+## Installing Light Access 
 
 **Maven**
 
-<dependency>
-  <groupId>com.codurance</groupId>
-  <artifactId>light-access</artifactId>
-  <version>0.1.0</version>
-</dependency>
+    <dependency>
+      <groupId>com.codurance</groupId>
+      <artifactId>light-access</artifactId>
+      <version>0.1.0</version>
+    </dependency>
 
 <a name="start"></a>    
 ## Getting started 
