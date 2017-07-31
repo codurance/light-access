@@ -1,3 +1,5 @@
+**TODO:** Add the last CI run indicator 
+
 Light Access
 ============
 
@@ -13,6 +15,14 @@ This library is for Java developers who:
 * Want to reduce boiler plate code from their repositories.
 * Don't want to deal with JDBC's complexities and annoying exception handling.
 * Don't like to use any sort of automatic binding between their data structures and database.
+
+**TODO:** Create an index here so people can jump straight to the section they want to see. 
+
+# Installing Light Access (????)
+
+**TODO:** Check how other libraries say this (installing?). 
+
+**TODO:** Add information about group, artifact id, name for Maven and Gradle.  
 
 # Getting started
 
@@ -36,7 +46,7 @@ First let's define a DDL statement which create a table called 'products' with 3
 
 ```java
     private static final String CREATE_PRODUCTS_TABLE = 
-        "CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+        "CREATE TABLE products (id integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
 ```
 
 So now, the only thing we need to do is to use the LightAccess to execute this DDL command.
@@ -181,6 +191,21 @@ And in case you prefer the inlined version:
 **TODO:** Create an example using Order (1) -> (*) Product. Probably better to have an integration test.
 
 **TODO:** Create an example of collecting it to a different DTO.
+
+Let's say we have a table with orders and a table with product:
+
+```java
+"CREATE TABLE baskets (basketId integer PRIMARY KEY, userId integer, created TIMESTAMP)";
+"CREATE TABLE products (productId integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+"CREATE TABLE basket_items (basketId integer, productId integer, quantity integer)";
+```
+Now, let's say we want to populate an object called basket:
+
+```java
+public class Basket {
+    
+}
+```
 
 ### Insert, Delete, and Update   
 

@@ -34,4 +34,10 @@ public class OneToMany<K, V> {
         return reflectionEquals(this, other);
     }
 
+    @Override
+    public String toString() {
+        return "OneToMany{" +
+                "data=" + data +
+                '}';
+    }
 }
