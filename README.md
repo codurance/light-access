@@ -23,7 +23,7 @@ This library is for Java developers who:
 2. [Getting started](#start)
 3. [DDL statements](#ddlstatements) 
     1. [DDLCommand](#ddlcommand)
-    2. [Executing multiple DDL commands][#multipleddlstatements]
+    2. [Executing multiple DDL commands](#multipleddlstatements)
 4. [DML statements](#dmlstatements)
     1. [Select - single result](#selectsingleresult)
     2. [Select - multiple results](selectmultipleresults)
