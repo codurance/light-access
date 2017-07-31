@@ -1,15 +1,10 @@
 group 'com.codurance'
-version '0.1-SNAPSHOT'
+version '0.1.0'
 
 apply plugin: 'java'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
 
 dependencies {
     compile group: 'postgresql', name: 'postgresql', version: "9.1-901-1.jdbc4"
@@ -22,3 +17,15 @@ dependencies {
 
     testCompile 'com.h2database:h2:1.4.196'
 }
+
+def isReleaseBuild() {
+    return version.contains("SNAPSHOT") == false
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+// Used to push in maven
+apply from: './maven_push.gradle'

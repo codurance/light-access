@@ -40,9 +40,13 @@ This library is for Java developers who:
 <a name="installation"></a>
 ## Installing Light Access (????) 
 
-**TODO:** Check how other libraries say this (installing?). 
+**Maven**
 
-**TODO:** Add information about group, artifact id, name for Maven and Gradle.  
+<dependency>
+  <groupId>com.codurance</groupId>
+  <artifactId>light-access</artifactId>
+  <version>0.1.0</version>
+</dependency>
 
 <a name="start"></a>    
 ## Getting started 
