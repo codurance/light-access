@@ -306,7 +306,7 @@ So now we are ready to get a list of `UserWithWishList` objects:
     }    
 ```
 
-For more details, please check the [integration tests for joins][?]
+For more details, please check the [integration tests for joins][5]
 
 ### Insert, Delete, and Update   
 
@@ -455,7 +455,7 @@ We can also map that to String or any other object:
 ## Creating Statement, PreparedStatement and CallableStatement
 
 An instance of `LAConnection` will be received in all queries and commands represented by `DDLCommand`, `SQLCommand` 
-and `SQLQuery`.  With this instance you can create a [Statement][?], [PreparedStatement][?] and CallableStatement[?], 
+and `SQLQuery`.  With this instance you can create a [Statement][6], [PreparedStatement][7] and CallableStatement[8], 
 according to your need. 
 
 As a guideline, we normally use a `Statement` for DDL, a `PreparedStatement` for DML and `CallableStatement` for calling
@@ -463,27 +463,27 @@ stored procedures or sequences.
 
 # Further documentation 
 
-Please check the [tests][?] for more details in how to use this library.  
+Please check the [tests][9] for more details in how to use this library.  
 
 ### Databases tested
 
-We have only tested this library with [Amazon RDS][?] for [PostgreSQL][?]. 
+We have only tested this library with [Amazon RDS][10] for [PostgreSQL][11]. 
 
 #### History
 
-This library was first created by [Sandro Mancuso][?] while refactoring and removing duplication from multiple 
-repositories in one of the [Codurance][?]'s internal projects.
+This library was first created by [Sandro Mancuso][12] while refactoring and removing duplication from multiple 
+repositories in one of the [Codurance][13]'s internal projects.
 
 [1]: https://docs.oracle.com/javase/tutorial/jdbc/basics/
 [2]: http://link to LightAccess class on github.  
 [3]: link to the repository building block (DDD)
 [4]: link to h2 database. 
-[?]: link to the test package
-[?]: link to JoinsIntegrationTest
-[?]: link to JDBC Statement
-[?]: link to JDBC PreparedStatement
-[?]: link to JDBC CallableStatement
-[?]: link to Amazon RDS
-[?]: link to PostgreSQL
-[?]: http://twitter.com/sandromancuso
-[?]: http://codurance.com
+[5]: link to JoinsIntegrationTest
+[6]: link to JDBC Statement
+[7]: link to JDBC PreparedStatement
+[8]: link to JDBC CallableStatement
+[9]: link to the test package
+[10]: link to Amazon RDS
+[11]: link to PostgreSQL
+[12]: http://twitter.com/sandromancuso
+[13]: http://codurance.com
