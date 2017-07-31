@@ -455,7 +455,7 @@ We can also map that to String or any other object:
 ## Creating Statement, PreparedStatement and CallableStatement
 
 An instance of `LAConnection` will be received in all queries and commands represented by `DDLCommand`, `SQLCommand` 
-and `SQLQuery`.  With this instance you can create a [Statement][6], [PreparedStatement][7] and CallableStatement[8], 
+and `SQLQuery`.  With this instance you can create a [Statement][6], [PreparedStatement][7] and [CallableStatement][8], 
 according to your need. 
 
 As a guideline, we normally use a `Statement` for DDL, a `PreparedStatement` for DML and `CallableStatement` for calling
