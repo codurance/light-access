@@ -5,7 +5,7 @@ import com.codurance.lightaccess.executables.DDLCommand;
 import com.codurance.lightaccess.mapping.KeyValue;
 import com.codurance.lightaccess.mapping.LAResultSet;
 import com.codurance.lightaccess.mapping.OneToMany;
-import integration.entities.*;
+import integration.dtos.*;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;

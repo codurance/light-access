@@ -1,4 +1,4 @@
-package integration.entities;
+package integration.dtos;
 
 import java.time.LocalDate;
 

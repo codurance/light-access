@@ -1,24 +1,18 @@
-package integration.entities;
+package integration.dtos;
+
+import java.util.List;
 
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
-public class User {
+public class WishListProduct {
 
-    private final Integer id;
-    private final String name;
+    private final WishList wishList;
+    private final List<Product> products;
 
-    public User(Integer id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Integer id() {
-        return id;
-    }
-
-    public String name() {
-        return name;
+    public WishListProduct(WishList wishList, List<Product> products) {
+        this.wishList = wishList;
+        this.products = products;
     }
 
     @Override
@@ -33,9 +27,9 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+        return "WithListProduct{" +
+                "wishList=" + wishList +
+                ", products=" + products +
                 '}';
     }
 }
