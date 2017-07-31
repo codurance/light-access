@@ -29,7 +29,7 @@ This library is for Java developers who:
     2. [Select - multiple results](#selectmultipleresults)
     3. [Normalising one to many joins](#onetomanyjoins)    
     4. [Insert](#insert)
-    5. [Update](#udpate)
+    5. [Update](#update)
     6. [Delete](#delete)
     7. [Statement, PreparedStatement and CallableStatement](#jdbcstatements)
 5. [Further documentation](#furtherdocumentation)
