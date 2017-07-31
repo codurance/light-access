@@ -1,3 +1,5 @@
+**TODO:** Add the last CI run indicator 
+
 Light Access
 ============
 
@@ -13,6 +15,14 @@ This library is for Java developers who:
 * Want to reduce boiler plate code from their repositories.
 * Don't want to deal with JDBC's complexities and annoying exception handling.
 * Don't like to use any sort of automatic binding between their data structures and database.
+
+**TODO:** Create an index here so people can jump straight to the section they want to see. 
+
+# Installing Light Access (????)
+
+**TODO:** Check how other libraries say this (installing?). 
+
+**TODO:** Add information about group, artifact id, name for Maven and Gradle.  
 
 # Getting started
 
@@ -36,7 +46,7 @@ First let's define a DDL statement which create a table called 'products' with 3
 
 ```java
     private static final String CREATE_PRODUCTS_TABLE = 
-        "CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+        "CREATE TABLE products (id integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
 ```
 
 So now, the only thing we need to do is to use the LightAccess to execute this DDL command.
@@ -71,7 +81,33 @@ The `LightAccess.executeDDLCommand(DDLCommand command)` receives a `DDLCommand` 
     }
 ```   
 
-With that, you can pass in any lambda that satisfy the `execute(LAConnection connection)` method signature. 
+With that, you can pass in any lambda that satisfy the `execute(LAConnection connection)` method signature.
+
+### Executing multiple DDL commands
+
+It is possible to execute multiple commands in one go:
+
+```java
+    private static final String CREATE_USERS_TABLE = "CREATE TABLE users (userId integer PRIMARY KEY, name VARCHAR(255))";
+    private static final String CREATE_WISHLISTS_TABLE = "CREATE TABLE wishlists (wishListId integer PRIMARY KEY, userId integer, name VARCHAR(255), creationDate TIMESTAMP)";
+    private static final String CREATE_PRODUCTS_TABLE = "CREATE TABLE products (productId integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+    private static final String CREATE_WISHLIST_PRODUCT_TABLE = "CREATE TABLE wishlist_product (id integer PRIMARY KEY, wishListId integer, productId integer)";
+```
+
+```java
+    public void create_all_tables() {
+        lightAccess.executeDDLCommand(createTables());
+    }
+    
+    private DDLCommand createTables() {
+        return (conn) -> {
+            conn.statement(CREATE_USERS_TABLE).execute();
+            conn.statement(CREATE_WISHLISTS_TABLE).execute();
+            conn.statement(CREATE_PRODUCTS_TABLE).execute();
+            conn.statement(CREATE_WISHLIST_PRODUCT_TABLE).execute();
+        };
+    }
+``` 
 
 ## Executing DML statements
 
@@ -178,18 +214,248 @@ And in case you prefer the inlined version:
 
 ### Normalising one to many joins
 
-**TODO:** Create an example using Order (1) -> (*) Product. Probably better to have an integration test.
+Let's say we have a table with users and a table with wish lists:
 
-**TODO:** Create an example of collecting it to a different DTO.
+```sql
+CREATE TABLE users (userId integer PRIMARY KEY, name VARCHAR(255));
+CREATE TABLE wishlists (wishListId integer PRIMARY KEY, userId integer, name VARCHAR(255), creationDate TIMESTAMP);
+```
+
+Now let's assume we want to have all users and their respective wish lists, including the users without wish list. 
+
+```sql
+select u.userId, u.name, w.wishListId, w.userId, w.name, w.creationDate
+    from users u 
+    left join wishlists w on u.userId = w.userId
+```
+
+We want the result to be stored in a list containing the following DTO:
+
+```java
+    public class UserWithWishList {
+    
+        private final User user;
+        private final List<WishList> wishLists;
+    
+        public UserWithWishList(User user, List<WishList> wishLists) {
+            this.user = user;
+            this.wishLists = unmodifiableList(wishLists);
+        }
+    
+        // getters, equals, hashcode.
+    }
+```
+
+For this to work we need to have a DTO for user and a DTO for the wish list:
+
+```java
+   public class User {
+   
+       private final Integer id;
+       private final String name;
+   
+       public User(Integer id, String name) {
+           this.id = id;
+           this.name = name;
+       }
+
+       // getters, equals, hashcode.
+    }
+```
+
+```java
+    public class WishList {
+    
+        private final Integer id;
+        private final Integer userId;
+        private final String name;
+        private final LocalDate creationDate;
+    
+        public WishList(Integer id, Integer userId, String name, LocalDate creationDate) {
+            this.id = id;
+            this.userId = userId;
+            this.name = name;
+            this.creationDate = creationDate;
+        }
+    }
+```
+
+So now we are ready to get a list of `UserWithWishList` objects:
+
+```java
+
+    public List<UserWithWishList> usersWithWishLists() {
+        OneToMany<User, WishList> wishListsPerUser = lightAccess.executeQuery((conn -> 
+                conn.prepareStatement(SELECT_WISHLISTS_PER_USER_SQL)
+                     .executeQuery()
+                     .normaliseOneToMany(this::mapToUserWishList)))
+        
+        return wishListsPerUser.collect((user, wishLists) -> new UserWithWishList(user, wishLists));
+    }
+    
+    private KeyValue<User, Optional<WishList>> mapToUserWishList(LAResultSet laResultSet) {
+        User user = new User(laResultSet.getInt(1), laResultSet.getString(2));
+
+        Optional<WishList> wishList = Optional.ofNullable((laResultSet.getInt(3) > 0)
+                                                    ? new WishList(laResultSet.getInt(3),
+                                                                    laResultSet.getInt(4),
+                                                                    laResultSet.getString(5),
+                                                                    laResultSet.getLocalDate(6))
+                                                    : null);
+        return new KeyValue<>(user, wishList);
+    }    
+```
+
+For more details, please check the [integration tests for joins][5]
 
 ### Insert, Delete, and Update   
 
+#### Insert
+
+Let's assume we have the following product table:
+
+```sql
+CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)
+```
+
+And we have the following Product DTO. 
+
+```java
+    public class Product {
+        private int id;
+        private String name;
+        private LocalDate date;
+    
+        public Product(int id, String name, LocalDate date) {
+            this.id = id;
+            this.name = name;
+            this.date = date;
+        }
+    
+        public int id() {
+            return id;
+        }
+    
+        public String name() {
+            return name;
+        }
+    
+        public LocalDate date() {
+            return date;
+        }
+        
+        // equals, hashcode
+    }
+```
+
+For inserting a product, we just need to do the following:
+
+```java
+    INSERT_PRODUCT_SQL = "insert into products (id, name, date) values (?, ?, ?)";
+
+    Product product = new Product(1, "Product 1", LocalDate.of(2017, 07, 26));
+
+    lightAccess.executeCommand(conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
+                                            .withParam(product.id())
+                                            .withParam(product.name())
+                                            .withParam(product.date())
+                                            .executeUpdate());
+```
+
+And as always, can extract the lambda to a method:
+
+```java
+    private SQLCommand insert(Product product) {
+        return conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
+                            .withParam(product.id())
+                            .withParam(product.name())
+                            .withParam(product.date())
+                            .executeUpdate();
+    }
+```
+
+And call it like that:
+
+```java
+    lightAccess.executeCommand(insert(produt));
+```
+ 
+#### Update 
+
+Let's say that we wan to update the name of the given product.
+
+```java
+private static final String UPDATE_PRODUCT_NAME_SQL = "update products set name = ? where id = ?";
+```
+
+Now we can execute the update:
+
+```java
+    lightAccess.executeCommand(updateProductName(1, "Another name"));
+```
+
+```java
+    private SQLCommand updateProductName(int id, String name) {
+        return conn -> conn.prepareStatement(UPDATE_PRODUCT_NAME_SQL)
+                            .withParam(name)
+                            .withParam(id)
+                            .executeUpdate();
+    }
+```
+
+#### Delete
+
+Delete is exactly the same as inserts and updates. 
+
 ## Calling sequences (PostgreSQL / H2)
+
+Let's first create a sequence:
+
+```java
+    private static final String ID_SEQUENCE = "id_sequence";
+    private static final String CREATE_SEQUENCE_DDL = "CREATE SEQUENCE " + ID_SEQUENCE + " START WITH 1";
+```
+
+```java
+    lightAccess.executeDDLCommand((conn) -> conn.statement(CREATE_SEQUENCE_DDL).execute());
+```
+
+Now we can read the next ID from it. 
+
+```java
+   int id = lightAccess.nextId(ID_SEQUENCE);
+```
+
+In case we don't want an int ID, we can also map the ID to something else:
+
+```java
+    ProductID secondId = lightAccess.nextId(ID_SEQUENCE, ProductID::new);
+```
+
+Where `ProductID` is:
+
+```java
+    public class ProductID {
+        private int id;
+    
+        public ProductID(int id) {
+            this.id = id;
+        }
+        
+        // getter, equals, hashcode
+    }
+```
+
+We can also map that to String or any other object:
+
+```java
+    String stringID = lightAccess.nextId(ID_SEQUENCE, Object::toString);
+```
 
 ## Creating Statement, PreparedStatement and CallableStatement
 
 An instance of `LAConnection` will be received in all queries and commands represented by `DDLCommand`, `SQLCommand` 
-and `SQLQuery`.  With this instance you can create a [Statement][?], [PreparedStatement][?] and CallableStatement[?], 
+and `SQLQuery`.  With this instance you can create a [Statement][6], [PreparedStatement][7] and CallableStatement[8], 
 according to your need. 
 
 As a guideline, we normally use a `Statement` for DDL, a `PreparedStatement` for DML and `CallableStatement` for calling
@@ -197,26 +463,27 @@ stored procedures or sequences.
 
 # Further documentation 
 
-Please check the [tests][?] for more details in how to use this library.  
+Please check the [tests][9] for more details in how to use this library.  
 
 ### Databases tested
 
-We have only tested this library with [Amazon RDS][?] for [PostgreSQL][?]. 
+We have only tested this library with [Amazon RDS][10] for [PostgreSQL][11]. 
 
 #### History
 
-This library was first created by [Sandro Mancuso][?] while refactoring and removing duplication from multiple 
-repositories in one of the [Codurance][?]'s internal projects.
+This library was first created by [Sandro Mancuso][12] while refactoring and removing duplication from multiple 
+repositories in one of the [Codurance][13]'s internal projects.
 
 [1]: https://docs.oracle.com/javase/tutorial/jdbc/basics/
-[2]: http://link to LightAccess class on github.  
-[3]: link to the repository building block (DDD)
-[4]: link to h2 database. 
-[?]: link to the test package
-[?]: link to JDBC Statement
-[?]: link to JDBC PreparedStatement
-[?]: link to JDBC CallableStatement
-[?]: link to Amazon RDS
-[?]: link to PostgreSQL
-[?]: http://twitter.com/sandromancuso
-[?]: http://codurance.com
+[2]: https://github.com/codurance/light-access/blob/master/src/main/java/com/codurance/lightaccess/LightAccess.java  
+[3]: https://martinfowler.com/eaaCatalog/repository.html
+[4]: http://www.h2database.com/html/main.html 
+[5]: link to JoinsIntegrationTest
+[6]: https://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html
+[7]: https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html
+[8]: https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html
+[9]: https://github.com/codurance/light-access/tree/master/src/test/java
+[10]: https://aws.amazon.com/rds/
+[11]: https://www.postgresql.org/
+[12]: http://twitter.com/sandromancuso
+[13]: http://codurance.com

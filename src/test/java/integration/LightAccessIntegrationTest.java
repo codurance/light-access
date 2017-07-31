@@ -5,6 +5,8 @@ import com.codurance.lightaccess.executables.DDLCommand;
 import com.codurance.lightaccess.executables.SQLCommand;
 import com.codurance.lightaccess.executables.SQLQuery;
 import com.codurance.lightaccess.mapping.LAResultSet;
+import integration.dtos.Product;
+import integration.dtos.ProductID;
 import org.h2.jdbcx.JdbcConnectionPool;
 import org.junit.After;
 import org.junit.Before;
@@ -17,8 +19,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.String.format;
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class LightAccessIntegrationTest {
@@ -95,7 +95,7 @@ public class LightAccessIntegrationTest {
         lightAccess.executeCommand(insert(PRODUCT_ONE));
         lightAccess.executeCommand(insert(PRODUCT_TWO));
 
-        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id()));
 
         assertThat(product.get()).isEqualTo(PRODUCT_TWO);
     }
@@ -104,7 +104,7 @@ public class LightAccessIntegrationTest {
     retrieve_an_empty_optional_when_not_record_is_found() {
         lightAccess.executeCommand(insert(PRODUCT_ONE));
 
-        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id()));
 
         assertThat(product.isPresent()).isEqualTo(false);
     }
@@ -125,9 +125,9 @@ public class LightAccessIntegrationTest {
         lightAccess.executeCommand(insert(PRODUCT_ONE));
         lightAccess.executeCommand(updateProductName(1, "Another name"));
 
-        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_ONE.id));
+        Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_ONE.id()));
 
-        assertThat(product.get()).isEqualTo(new Product(PRODUCT_ONE.id, "Another name", PRODUCT_ONE.date));
+        assertThat(product.get()).isEqualTo(new Product(PRODUCT_ONE.id(), "Another name", PRODUCT_ONE.date()));
     }
 
     @Test public void
@@ -161,15 +161,15 @@ public class LightAccessIntegrationTest {
 
     private SQLCommand delete(Product product) {
         return conn -> conn.prepareStatement(DELETE_PRODUCT_SQL)
-                            .withParam(product.id)
+                            .withParam(product.id())
                             .executeUpdate();
     }
 
     private SQLCommand insert(Product product) {
         return conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
-                            .withParam(product.id)
-                            .withParam(product.name)
-                            .withParam(product.date)
+                            .withParam(product.id())
+                            .withParam(product.name())
+                            .withParam(product.date())
                             .executeUpdate();
     }
 
@@ -208,53 +208,5 @@ public class LightAccessIntegrationTest {
     private DDLCommand dropAllObjects() {
         return (conn) -> conn.statement(DROP_ALL_OBJECTS).execute();
     }
-    
-    private static class Product {
-        private int id;
-        private String name;
-        private LocalDate date;
 
-        Product(int id, String name, LocalDate date) {
-            this.id = id;
-            this.name = name;
-            this.date = date;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return reflectionEquals(this, o);
-        }
-
-        @Override
-        public int hashCode() {
-            return reflectionHashCode(this);
-        }
-
-        @Override
-        public String toString() {
-            return "Product{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    ", date=" + date +
-                    '}';
-        }
-    }
-
-    private static class ProductID {
-        private int id;
-
-        ProductID(int id) {
-            this.id = id;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            return reflectionEquals(this, other);
-        }
-
-        @Override
-        public int hashCode() {
-            return reflectionHashCode(this);
-        }
-    }
 }
