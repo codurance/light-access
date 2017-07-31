@@ -475,15 +475,15 @@ This library was first created by [Sandro Mancuso][12] while refactoring and rem
 repositories in one of the [Codurance][13]'s internal projects.
 
 [1]: https://docs.oracle.com/javase/tutorial/jdbc/basics/
-[2]: http://link to LightAccess class on github.  
-[3]: link to the repository building block (DDD)
-[4]: link to h2 database. 
+[2]: https://github.com/codurance/light-access/blob/master/src/main/java/com/codurance/lightaccess/LightAccess.java  
+[3]: https://martinfowler.com/eaaCatalog/repository.html
+[4]: http://www.h2database.com/html/main.html 
 [5]: link to JoinsIntegrationTest
-[6]: link to JDBC Statement
-[7]: link to JDBC PreparedStatement
-[8]: link to JDBC CallableStatement
-[9]: link to the test package
-[10]: link to Amazon RDS
-[11]: link to PostgreSQL
+[6]: https://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html
+[7]: https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html
+[8]: https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html
+[9]: https://github.com/codurance/light-access/tree/master/src/test/java
+[10]: https://aws.amazon.com/rds/
+[11]: https://www.postgresql.org/
 [12]: http://twitter.com/sandromancuso
 [13]: http://codurance.com
