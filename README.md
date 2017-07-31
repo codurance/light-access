@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/codurance/light-access/tree/master.svg?style=svg)](https://circleci.com/gh/codurance/light-access/tree/master)
+[![CircleCI](https://circleci.com/gh/codurance/light-access/tree/master.svg?style=shield)](https://circleci.com/gh/codurance/light-access/tree/master)
 
 Light Access
 ============
