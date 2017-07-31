@@ -188,26 +188,198 @@ And in case you prefer the inlined version:
 
 ### Normalising one to many joins
 
-**TODO:** Create an example using Order (1) -> (*) Product. Probably better to have an integration test.
+Let's say we have a table with users and a table with wish lists:
 
-**TODO:** Create an example of collecting it to a different DTO.
-
-Let's say we have a table with orders and a table with product:
-
-```java
-"CREATE TABLE baskets (basketId integer PRIMARY KEY, userId integer, created TIMESTAMP)";
-"CREATE TABLE products (productId integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
-"CREATE TABLE basket_items (basketId integer, productId integer, quantity integer)";
+```sql
+CREATE TABLE users (userId integer PRIMARY KEY, name VARCHAR(255));
+CREATE TABLE wishlists (wishListId integer PRIMARY KEY, userId integer, name VARCHAR(255), creationDate TIMESTAMP);
 ```
-Now, let's say we want to populate an object called basket:
+
+Now let's assume we want to have all users and their respective wish lists, including the users without wish list. 
+
+```sql
+select u.userId, u.name, w.wishListId, w.userId, w.name, w.creationDate
+    from users u 
+    left join wishlists w on u.userId = w.userId
+```
+
+We want the result to be stored in a list containing the following DTO:
 
 ```java
-public class Basket {
+    public class UserWithWishList {
     
-}
+        private final User user;
+        private final List<WishList> wishLists;
+    
+        public UserWithWishList(User user, List<WishList> wishLists) {
+            this.user = user;
+            this.wishLists = unmodifiableList(wishLists);
+        }
+    
+        // getters, equals, hashcode.
+    }
 ```
+
+For this to work we need to have a DTO for user and a DTO for the wish list:
+
+```java
+   public class User {
+   
+       private final Integer id;
+       private final String name;
+   
+       public User(Integer id, String name) {
+           this.id = id;
+           this.name = name;
+       }
+
+       // getters, equals, hashcode.
+    }
+```
+
+```java
+    public class WishList {
+    
+        private final Integer id;
+        private final Integer userId;
+        private final String name;
+        private final LocalDate creationDate;
+    
+        public WishList(Integer id, Integer userId, String name, LocalDate creationDate) {
+            this.id = id;
+            this.userId = userId;
+            this.name = name;
+            this.creationDate = creationDate;
+        }
+    }
+```
+
+So now we are ready to get a list of `UserWithWishList` objects:
+
+```java
+
+    public List<UserWithWishList> usersWithWishLists() {
+        OneToMany<User, WishList> wishListsPerUser = lightAccess.executeQuery((conn -> 
+                conn.prepareStatement(SELECT_WISHLISTS_PER_USER_SQL)
+                     .executeQuery()
+                     .normaliseOneToMany(this::mapToUserWishList)))
+        
+        return wishListsPerUser.collect((user, wishLists) -> new UserWithWishList(user, wishLists));
+    }
+    
+    private KeyValue<User, Optional<WishList>> mapToUserWishList(LAResultSet laResultSet) {
+        User user = new User(laResultSet.getInt(1), laResultSet.getString(2));
+
+        Optional<WishList> wishList = Optional.ofNullable((laResultSet.getInt(3) > 0)
+                                                    ? new WishList(laResultSet.getInt(3),
+                                                                    laResultSet.getInt(4),
+                                                                    laResultSet.getString(5),
+                                                                    laResultSet.getLocalDate(6))
+                                                    : null);
+        return new KeyValue<>(user, wishList);
+    }    
+```
+
+For more details, please check the [integration tests for joins][?]
 
 ### Insert, Delete, and Update   
+
+#### Insert
+
+Let's assume we have the following product table:
+
+```sql
+CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)
+```
+
+And we have the following Product DTO. 
+
+```java
+    public class Product {
+        private int id;
+        private String name;
+        private LocalDate date;
+    
+        public Product(int id, String name, LocalDate date) {
+            this.id = id;
+            this.name = name;
+            this.date = date;
+        }
+    
+        public int id() {
+            return id;
+        }
+    
+        public String name() {
+            return name;
+        }
+    
+        public LocalDate date() {
+            return date;
+        }
+        
+        // equals, hashcode
+    }
+```
+
+For inserting a product, we just need to do the following:
+
+```java
+    INSERT_PRODUCT_SQL = "insert into products (id, name, date) values (?, ?, ?)";
+
+    Product product = new Product(1, "Product 1", LocalDate.of(2017, 07, 26));
+
+    lightAccess.executeCommand(conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
+                                            .withParam(product.id())
+                                            .withParam(product.name())
+                                            .withParam(product.date())
+                                            .executeUpdate());
+```
+
+And as always, can extract the lambda to a method:
+
+```java
+    private SQLCommand insert(Product product) {
+        return conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
+                            .withParam(product.id())
+                            .withParam(product.name())
+                            .withParam(product.date())
+                            .executeUpdate();
+    }
+```
+
+And call it like that:
+
+```java
+    lightAccess.executeCommand(insert(produt));
+```
+ 
+#### Update 
+
+Let's say that we wan to update the name of the given product.
+
+```java
+private static final String UPDATE_PRODUCT_NAME_SQL = "update products set name = ? where id = ?";
+```
+
+Now we can execute the update:
+
+```java
+    lightAccess.executeCommand(updateProductName(1, "Another name"));
+```
+
+```java
+    private SQLCommand updateProductName(int id, String name) {
+        return conn -> conn.prepareStatement(UPDATE_PRODUCT_NAME_SQL)
+                            .withParam(name)
+                            .withParam(id)
+                            .executeUpdate();
+    }
+```
+
+#### Delete
+
+Delete is exactly the same as inserts and updates. 
 
 ## Calling sequences (PostgreSQL / H2)
 
@@ -238,6 +410,7 @@ repositories in one of the [Codurance][?]'s internal projects.
 [3]: link to the repository building block (DDD)
 [4]: link to h2 database. 
 [?]: link to the test package
+[?]: link to JoinsIntegrationTest
 [?]: link to JDBC Statement
 [?]: link to JDBC PreparedStatement
 [?]: link to JDBC CallableStatement
