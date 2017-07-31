@@ -1,4 +1,4 @@
-**TODO:** Add the last CI run indicator 
+[![CircleCI](https://circleci.com/gh/codurance/light-access/tree/master.svg?style=svg)](https://circleci.com/gh/codurance/light-access/tree/master)
 
 Light Access
 ============
