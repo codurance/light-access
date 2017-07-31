@@ -50,7 +50,7 @@ This library is for Java developers who:
     
 **Gradle**    
     
-    compile group: 'com.codurance', name: 'light-access', version: '0.1.10'    
+    compile group: 'com.codurance', name: 'light-access', version: '0.1.0'    
 
 <a name="start"></a>    
 ## Getting started 
