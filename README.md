@@ -23,20 +23,29 @@ This library is for Java developers who:
 2. [Getting started](#start)
 3. [DDL statements](#ddlstatements) 
     1. [DDLCommand](#ddlcommand)
+    2. [Executing multiple DDL commands][#multipleddlstatements]
+4. [DML statements](#dmlstatements)
+    1. [Select - single result](#selectsingleresult)
+    2. [Select - multiple results](selectmultipleresults)
+    3. [Normalising one to many joins](#onetomanyjoins)    
+    4. [Insert](#insert)
+    5. [Update](#udpate)
+    6. [Delete](#delete)
+    7. [Statement, PreparedStatement and CallableStatement](#jdbcstatements)
+5. [Further documentation](#furtherdocumentation)
+    1. [Databases tested](#databases)
+6. [History](#history)
 
-
-**TODO:** Create an index here so people can jump straight to the section they want to see. 
 
 <a name="installation"></a>
-# Installing Light Access (????) 
+## Installing Light Access (????) 
 
 **TODO:** Check how other libraries say this (installing?). 
 
 **TODO:** Add information about group, artifact id, name for Maven and Gradle.  
 
-
-<a name"start"></a>    
-# Getting started 
+<a name="start"></a>    
+## Getting started 
 
 The main class to look at is [LightAccess][2]. We recommend to have this class injected into your [repositories][3]. 
 
@@ -52,8 +61,7 @@ JdbcConnectionPool jdbcConnectionPool = JdbcConnectionPool.create("jdbc:h2:mem:t
 LightAccess lightAccess = new LightAccess(jdbcConnectionPool);
 ``` 
 
-
-<a name"ddlstatements"></a>       
+<a name="ddlstatements"></a>       
 ## Executing DDL statements     
 
 First let's define a DDL statement which create a table called 'products' with 3 fields. 
@@ -98,7 +106,8 @@ The `LightAccess.executeDDLCommand(DDLCommand command)` receives a `DDLCommand` 
 
 With that, you can pass in any lambda that satisfy the `execute(LAConnection connection)` method signature.
 
-### Executing multiple DDL commands
+<a name="multipleddlstatements"></a>
+### Executing multiple DDL statements
 
 It is possible to execute multiple commands in one go:
 
@@ -124,6 +133,7 @@ It is possible to execute multiple commands in one go:
     }
 ``` 
 
+<a name="dmlstatements"></a>
 ## Executing DML statements
 
 Let's assume we have an object `Product` that we want to map to the `products` table. 
@@ -146,6 +156,7 @@ Let's assume we have an object `Product` that we want to map to the `products` t
     }
 ```   
 
+<a name="selectsingleresult"></a>
 ### Select - single result 
 
 Let's take the following select statement.
@@ -192,6 +203,7 @@ In case you prefer an inline version, you can use:
                                                                         .onlyResult(this::toProduct));
 ```
 
+<a name="selectmultipleresults"></a>
 ### Select - multiple results 
 
 Let's take the following select statement:
@@ -227,6 +239,7 @@ And in case you prefer the inlined version:
                                                                     .mapResults(this::toProduct));
 ```
 
+<a name="onetomanyjoins"></a>
 ### Normalising one to many joins
 
 Let's say we have a table with users and a table with wish lists:
@@ -323,9 +336,8 @@ So now we are ready to get a list of `UserWithWishList` objects:
 
 For more details, please check the [integration tests for joins][5]
 
-### Insert, Delete, and Update   
-
-#### Insert
+<a name="insert"></a>
+### Insert
 
 Let's assume we have the following product table:
 
@@ -395,7 +407,8 @@ And call it like that:
     lightAccess.executeCommand(insert(produt));
 ```
  
-#### Update 
+<a name="update"></a> 
+### Update 
 
 Let's say that we wan to update the name of the given product.
 
@@ -418,7 +431,8 @@ Now we can execute the update:
     }
 ```
 
-#### Delete
+<a name="delete"></a>
+### Delete
 
 Delete is exactly the same as inserts and updates. 
 
@@ -467,7 +481,8 @@ We can also map that to String or any other object:
     String stringID = lightAccess.nextId(ID_SEQUENCE, Object::toString);
 ```
 
-## Creating Statement, PreparedStatement and CallableStatement
+<a name="jdbcstatements"></a>
+### Creating Statement, PreparedStatement and CallableStatement
 
 An instance of `LAConnection` will be received in all queries and commands represented by `DDLCommand`, `SQLCommand` 
 and `SQLQuery`.  With this instance you can create a [Statement][6], [PreparedStatement][7] and [CallableStatement][8], 
@@ -476,15 +491,18 @@ according to your need.
 As a guideline, we normally use a `Statement` for DDL, a `PreparedStatement` for DML and `CallableStatement` for calling
 stored procedures or sequences. 
 
+<a name="furtherdocumentation"></a>
 # Further documentation 
 
 Please check the [tests][9] for more details in how to use this library.  
 
+<a name="databases"></a>
 ### Databases tested
 
 We have only tested this library with [Amazon RDS][10] for [PostgreSQL][11]. 
 
-#### History
+<a name="history"></a>
+## History
 
 This library was first created by [Sandro Mancuso][12] while refactoring and removing duplication from multiple 
 repositories in one of the [Codurance][13]'s internal projects.
