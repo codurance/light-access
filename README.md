@@ -478,7 +478,7 @@ repositories in one of the [Codurance][13]'s internal projects.
 [2]: https://github.com/codurance/light-access/blob/master/src/main/java/com/codurance/lightaccess/LightAccess.java  
 [3]: https://martinfowler.com/eaaCatalog/repository.html
 [4]: http://www.h2database.com/html/main.html 
-[5]: link to JoinsIntegrationTest
+[5]: https://github.com/codurance/light-access/blob/master/src/test/java/integration/JoinsIntegrationTest.java
 [6]: https://docs.oracle.com/javase/8/docs/api/java/sql/Statement.html
 [7]: https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html
 [8]: https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html
