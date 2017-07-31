@@ -81,7 +81,33 @@ The `LightAccess.executeDDLCommand(DDLCommand command)` receives a `DDLCommand` 
     }
 ```   
 
-With that, you can pass in any lambda that satisfy the `execute(LAConnection connection)` method signature. 
+With that, you can pass in any lambda that satisfy the `execute(LAConnection connection)` method signature.
+
+### Executing multiple DDL commands
+
+It is possible to execute multiple commands in one go:
+
+```java
+    private static final String CREATE_USERS_TABLE = "CREATE TABLE users (userId integer PRIMARY KEY, name VARCHAR(255))";
+    private static final String CREATE_WISHLISTS_TABLE = "CREATE TABLE wishlists (wishListId integer PRIMARY KEY, userId integer, name VARCHAR(255), creationDate TIMESTAMP)";
+    private static final String CREATE_PRODUCTS_TABLE = "CREATE TABLE products (productId integer PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+    private static final String CREATE_WISHLIST_PRODUCT_TABLE = "CREATE TABLE wishlist_product (id integer PRIMARY KEY, wishListId integer, productId integer)";
+```
+
+```java
+    public void create_all_tables() {
+        lightAccess.executeDDLCommand(createTables());
+    }
+    
+    private DDLCommand createTables() {
+        return (conn) -> {
+            conn.statement(CREATE_USERS_TABLE).execute();
+            conn.statement(CREATE_WISHLISTS_TABLE).execute();
+            conn.statement(CREATE_PRODUCTS_TABLE).execute();
+            conn.statement(CREATE_WISHLIST_PRODUCT_TABLE).execute();
+        };
+    }
+``` 
 
 ## Executing DML statements
 
@@ -382,6 +408,49 @@ Now we can execute the update:
 Delete is exactly the same as inserts and updates. 
 
 ## Calling sequences (PostgreSQL / H2)
+
+Let's first create a sequence:
+
+```java
+    private static final String ID_SEQUENCE = "id_sequence";
+    private static final String CREATE_SEQUENCE_DDL = "CREATE SEQUENCE " + ID_SEQUENCE + " START WITH 1";
+```
+
+```java
+    lightAccess.executeDDLCommand((conn) -> conn.statement(CREATE_SEQUENCE_DDL).execute());
+```
+
+Now we can read the next ID from it. 
+
+```java
+   int id = lightAccess.nextId(ID_SEQUENCE);
+```
+
+In case we don't want an int ID, we can also map the ID to something else:
+
+```java
+    ProductID secondId = lightAccess.nextId(ID_SEQUENCE, ProductID::new);
+```
+
+Where `ProductID` is:
+
+```java
+    public class ProductID {
+        private int id;
+    
+        public ProductID(int id) {
+            this.id = id;
+        }
+        
+        // getter, equals, hashcode
+    }
+```
+
+We can also map that to String or any other object:
+
+```java
+    String stringID = lightAccess.nextId(ID_SEQUENCE, Object::toString);
+```
 
 ## Creating Statement, PreparedStatement and CallableStatement
 
