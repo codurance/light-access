@@ -16,15 +16,24 @@ This library is for Java developers who:
 * Don't want to deal with JDBC's complexities and annoying exception handling.
 * Don't like to use any sort of automatic binding between their data structures and database.
 
+
+# Table of Contents
+
+1. [Installing LightAccess](#installation)
+2. [Getting started](#start)
+3. [DDL statements](#ddlstatements) 
+    1. [DDLCommand](#ddlcommand)
+
+
 **TODO:** Create an index here so people can jump straight to the section they want to see. 
 
-# Installing Light Access (????)
+# Installing Light Access (????) <a name="installation"></a>
 
 **TODO:** Check how other libraries say this (installing?). 
 
 **TODO:** Add information about group, artifact id, name for Maven and Gradle.  
 
-# Getting started
+# Getting started <a name"start"></a>
 
 The main class to look at is [LightAccess][2]. We recommend to have this class injected into your [repositories][3]. 
 
@@ -40,7 +49,7 @@ JdbcConnectionPool jdbcConnectionPool = JdbcConnectionPool.create("jdbc:h2:mem:t
 LightAccess lightAccess = new LightAccess(jdbcConnectionPool);
 ``` 
 
-## Executing DDL statements
+## Executing DDL statements <a name"ddlstatements"></a>
 
 First let's define a DDL statement which create a table called 'products' with 3 fields. 
 
@@ -71,7 +80,7 @@ And use it like this.
     lightAccess.executeDDLCommand(createProductsTable());
 ```
 
-### DDLCommand
+### DDLCommand <a name="ddlcommand"></a>
 
 The `LightAccess.executeDDLCommand(DDLCommand command)` receives a `DDLCommand` as parameter. 
 
