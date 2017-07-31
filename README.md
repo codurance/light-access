@@ -47,6 +47,10 @@ This library is for Java developers who:
       <artifactId>light-access</artifactId>
       <version>0.1.0</version>
     </dependency>
+    
+**Gradle**    
+    
+    compile group: 'com.codurance', name: 'light-access', version: '0.1.10'    
 
 <a name="start"></a>    
 ## Getting started 
