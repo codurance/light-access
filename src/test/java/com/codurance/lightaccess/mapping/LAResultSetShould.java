@@ -41,6 +41,7 @@ public class LAResultSetShould {
 
     @Test public void
     return_zero_when_int_field_is_null() throws SQLException {
+        // JDBC java.sql.ResultSet.getInt(int columnindex) returns 0 when field is null.
         given(resultSet.getInt(1)).willReturn(0);
 
         assertThat(laResultSet.getInt(1)).isEqualTo(0);
@@ -57,7 +58,7 @@ public class LAResultSetShould {
     return_empty_string_when_string_field_is_null() throws SQLException {
         given(resultSet.getString(1)).willReturn(null);
 
-        assertThat(laResultSet.getString(1)).isEqualTo(null);
+        assertThat(laResultSet.getString(1)).isEqualTo("");
     }
 
     @Test public void

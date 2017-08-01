@@ -22,11 +22,12 @@ public class LAResultSet {
     }
 
     public String getString(int columnIndex) {
-        return executeQuery(() -> resultSet.getString(columnIndex));
+        String stringValue = executeQuery(() -> resultSet.getString(columnIndex));
+        return (stringValue != null) ? stringValue : "";
     }
 
     public Optional<String> getOptionalString(int columnIndex) {
-        return Optional.ofNullable(getString(columnIndex));
+        return Optional.ofNullable(executeQuery(() -> resultSet.getString(columnIndex)));
     }
 
     public LocalDate getLocalDate(int columnIndex) {
