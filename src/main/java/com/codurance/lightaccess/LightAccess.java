@@ -34,7 +34,7 @@ public class LightAccess {
     }
 
     public int nextId(String sequenceName) {
-        return nextId(sequenceName, (x) -> x);
+        return nextId(sequenceName, x -> x);
     }
 
     public <T> T nextId(String sequenceName, Function<Integer, T> nextId) {
