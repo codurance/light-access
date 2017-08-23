@@ -17,14 +17,13 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
+import static org.apache.commons.lang3.builder.ReflectionToStringBuilder.reflectionToString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LAResultSetShould {
-
-    private static final SimpleDateFormat YYYY_MM_DD_date_format = new SimpleDateFormat("yyyy-MM-dd");
 
     private static final LocalDate TODAY_LOCAL_DATE = LocalDate.of(2017, 07, 29);
     private static final java.sql.Date TODAY_SQL_DATE = localDateToSqlDate(TODAY_LOCAL_DATE);
@@ -252,10 +251,7 @@ public class LAResultSetShould {
 
         @Override
         public String toString() {
-            return "Person{" +
-                    "id=" + id +
-                    ", name='" + name + '\'' +
-                    '}';
+            return reflectionToString(this);
         }
     }
 
