@@ -3,8 +3,6 @@ package integration.dtos;
 import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class UserWithWishList {
 
@@ -25,13 +23,21 @@ public class UserWithWishList {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return reflectionEquals(this, other);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserWithWishList that = (UserWithWishList) o;
+
+        if (user != null ? !user.equals(that.user) : that.user != null) return false;
+        return wishLists != null ? wishLists.equals(that.wishLists) : that.wishLists == null;
     }
 
     @Override
     public int hashCode() {
-        return reflectionHashCode(this);
+        int result = user != null ? user.hashCode() : 0;
+        result = 31 * result + (wishLists != null ? wishLists.hashCode() : 0);
+        return result;
     }
 
     @Override

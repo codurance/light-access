@@ -9,15 +9,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
-import static org.apache.commons.lang3.builder.ReflectionToStringBuilder.reflectionToString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
@@ -29,7 +25,8 @@ public class LAResultSetShould {
     private static final java.sql.Date TODAY_SQL_DATE = localDateToSqlDate(TODAY_LOCAL_DATE);
     private static final java.util.Date TODAY_UTIL_DATE = sqlDateToUtilDate(TODAY_SQL_DATE);
 
-    @Mock ResultSet resultSet;
+    @Mock
+    ResultSet resultSet;
 
     private LAResultSet laResultSet;
 
@@ -38,7 +35,8 @@ public class LAResultSetShould {
         laResultSet = new LAResultSet(resultSet);
     }
 
-    @Test public void
+    @Test
+    public void
     return_zero_when_int_field_is_null() throws SQLException {
         // JDBC java.sql.ResultSet.getInt(int columnindex) returns 0 when field is null.
         given(resultSet.getInt(1)).willReturn(0);
@@ -46,70 +44,80 @@ public class LAResultSetShould {
         assertThat(laResultSet.getInt(1)).isEqualTo(0);
     }
 
-    @Test public void
+    @Test
+    public void
     return_int_when_int_field_has_value() throws SQLException {
         given(resultSet.getInt(1)).willReturn(10);
 
         assertThat(laResultSet.getInt(1)).isEqualTo(10);
     }
 
-    @Test public void
+    @Test
+    public void
     return_empty_string_when_string_field_is_null() throws SQLException {
         given(resultSet.getString(1)).willReturn(null);
 
         assertThat(laResultSet.getString(1)).isEqualTo("");
     }
 
-    @Test public void
+    @Test
+    public void
     return_string_when_string_field_has_value() throws SQLException {
         given(resultSet.getString(1)).willReturn("value");
 
         assertThat(laResultSet.getString(1)).isEqualTo("value");
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_empty_string_when_string_field_is_null() throws SQLException {
         given(resultSet.getString(1)).willReturn(null);
 
         assertThat(laResultSet.getOptionalString(1)).isEmpty();
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_string_when_string_field_has_value() throws SQLException {
         given(resultSet.getString(1)).willReturn("value");
 
         assertThat(laResultSet.getOptionalString(1)).contains("value");
     }
 
-    @Test public void
+    @Test
+    public void
     return_null_local_date_when_date_field_is_null() throws SQLException {
         given(resultSet.getDate(1)).willReturn(null);
 
         assertThat(laResultSet.getLocalDate(1)).isNull();
     }
 
-    @Test public void
+    @Test
+    public void
     return_local_date_when_date_field_has_value() throws SQLException {
         given(resultSet.getDate(1)).willReturn(TODAY_SQL_DATE);
-        
+
         assertThat(laResultSet.getLocalDate(1)).isEqualTo(TODAY_LOCAL_DATE);
     }
 
-    @Test public void
+    @Test
+    public void
     return_null_util_date_when_date_field_is_null() throws SQLException {
         given(resultSet.getDate(1)).willReturn(null);
 
         assertThat(laResultSet.getDate(1)).isNull();
     }
 
-    @Test public void
+    @Test
+    public void
     return_date_when_date_field_has_value() throws SQLException {
         given(resultSet.getDate(1)).willReturn(TODAY_SQL_DATE);
 
         assertThat(laResultSet.getDate(1)).isEqualTo(TODAY_UTIL_DATE);
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_empty_local_date_when_date_field_is_null() throws SQLException {
         given(resultSet.getDate(1)).willReturn(null);
 
@@ -118,7 +126,8 @@ public class LAResultSetShould {
         assertThat(date.isPresent()).isFalse();
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_local_date_when_date_field_has_value() throws SQLException {
         given(resultSet.getDate(1)).willReturn(TODAY_SQL_DATE);
 
@@ -127,16 +136,18 @@ public class LAResultSetShould {
         assertThat(date).contains(TODAY_LOCAL_DATE);
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_empty_when_result_set_has_no_records() throws SQLException {
         given(resultSet.next()).willReturn(false);
-        
+
         Optional<Person> person = laResultSet.onlyResult(this::toPerson);
 
         assertThat(person).isEmpty();
     }
 
-    @Test public void
+    @Test
+    public void
     return_optional_person_when_result_set_one_value() throws SQLException {
         Person aPerson = new Person(1, "Person");
         given(resultSet.next()).willReturn(true);
@@ -148,7 +159,8 @@ public class LAResultSetShould {
         assertThat(personOptional).contains(aPerson);
     }
 
-    @Test public void
+    @Test
+    public void
     return_empty_list_when_mapping_empty_result_set() throws SQLException {
         given(resultSet.next()).willReturn(false);
 
@@ -157,7 +169,8 @@ public class LAResultSetShould {
         assertThat(persons).isEmpty();
     }
 
-    @Test public void
+    @Test
+    public void
     return_list_of_entities_when_mapping_result_set() throws SQLException {
         Person person_1 = new Person(1, "Person 1");
         Person person_2 = new Person(2, "Person 2");
@@ -170,7 +183,8 @@ public class LAResultSetShould {
         assertThat(persons).containsExactlyInAnyOrder(person_1, person_2);
     }
 
-    @Test public void
+    @Test
+    public void
     return_a_normalised_one_to_many_structure_after_a_join_statement() throws SQLException {
         Person person_1 = new Person(1, "Person 1");
         Person person_2 = new Person(2, "Person 2");
@@ -195,7 +209,8 @@ public class LAResultSetShould {
         assertThat(persons).isEqualTo(expected);
     }
 
-    @Test public void
+    @Test
+    public void
     move_to_next_record() throws SQLException {
         laResultSet.nextRecord();
 
@@ -240,18 +255,29 @@ public class LAResultSetShould {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return reflectionEquals(this, other);
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Person person = (Person) o;
+
+            if (id != null ? !id.equals(person.id) : person.id != null) return false;
+            return name != null ? name.equals(person.name) : person.name == null;
         }
 
         @Override
         public int hashCode() {
-            return reflectionHashCode(this);
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (name != null ? name.hashCode() : 0);
+            return result;
         }
 
         @Override
         public String toString() {
-            return reflectionToString(this);
+            return "Person{" +
+                    "id=" + id +
+                    ", name='" + name + '\'' +
+                    '}';
         }
     }
 
@@ -265,13 +291,21 @@ public class LAResultSetShould {
         }
 
         @Override
-        public boolean equals(Object other) {
-            return reflectionEquals(this, other);
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Product product = (Product) o;
+
+            if (id != null ? !id.equals(product.id) : product.id != null) return false;
+            return description != null ? description.equals(product.description) : product.description == null;
         }
 
         @Override
         public int hashCode() {
-            return reflectionHashCode(this);
+            int result = id != null ? id.hashCode() : 0;
+            result = 31 * result + (description != null ? description.hashCode() : 0);
+            return result;
         }
 
         @Override

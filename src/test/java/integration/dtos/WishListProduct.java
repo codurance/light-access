@@ -2,8 +2,6 @@ package integration.dtos;
 
 import java.util.List;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class WishListProduct {
 
@@ -16,13 +14,21 @@ public class WishListProduct {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return reflectionEquals(this, other);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WishListProduct that = (WishListProduct) o;
+
+        if (wishList != null ? !wishList.equals(that.wishList) : that.wishList != null) return false;
+        return products != null ? products.equals(that.products) : that.products == null;
     }
 
     @Override
     public int hashCode() {
-        return reflectionHashCode(this);
+        int result = wishList != null ? wishList.hashCode() : 0;
+        result = 31 * result + (products != null ? products.hashCode() : 0);
+        return result;
     }
 
     @Override
