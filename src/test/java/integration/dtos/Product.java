@@ -2,8 +2,6 @@ package integration.dtos;
 
 import java.time.LocalDate;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class Product {
     private int id;
@@ -34,12 +32,22 @@ public class Product {
 
     @Override
     public boolean equals(Object o) {
-        return reflectionEquals(this, o);
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Product product = (Product) o;
+
+        if (id != product.id) return false;
+        if (name != null ? !name.equals(product.name) : product.name != null) return false;
+        return date != null ? date.equals(product.date) : product.date == null;
     }
 
     @Override
     public int hashCode() {
-        return reflectionHashCode(this);
+        int result = id;
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        return result;
     }
 
     @Override

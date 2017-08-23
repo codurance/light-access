@@ -1,7 +1,5 @@
 package integration.dtos;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class ProductID {
     private int id;
@@ -11,12 +9,17 @@ public class ProductID {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return reflectionEquals(this, other);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ProductID productID = (ProductID) o;
+
+        return id == productID.id;
     }
 
     @Override
     public int hashCode() {
-        return reflectionHashCode(this);
+        return id;
     }
 }

@@ -2,8 +2,6 @@ package integration.dtos;
 
 import java.time.LocalDate;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
-import static org.apache.commons.lang3.builder.HashCodeBuilder.reflectionHashCode;
 
 public class WishList {
 
@@ -36,13 +34,25 @@ public class WishList {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return reflectionEquals(this, other);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        WishList wishList = (WishList) o;
+
+        if (id != null ? !id.equals(wishList.id) : wishList.id != null) return false;
+        if (userId != null ? !userId.equals(wishList.userId) : wishList.userId != null) return false;
+        if (name != null ? !name.equals(wishList.name) : wishList.name != null) return false;
+        return creationDate != null ? creationDate.equals(wishList.creationDate) : wishList.creationDate == null;
     }
 
     @Override
     public int hashCode() {
-        return reflectionHashCode(this);
+        int result = id != null ? id.hashCode() : 0;
+        result = 31 * result + (userId != null ? userId.hashCode() : 0);
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (creationDate != null ? creationDate.hashCode() : 0);
+        return result;
     }
 
     @Override

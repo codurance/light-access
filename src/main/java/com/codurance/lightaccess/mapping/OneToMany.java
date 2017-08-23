@@ -3,7 +3,6 @@ package com.codurance.lightaccess.mapping;
 import java.util.*;
 import java.util.function.BiFunction;
 
-import static org.apache.commons.lang3.builder.EqualsBuilder.reflectionEquals;
 
 public class OneToMany<K, V> {
 
@@ -30,8 +29,18 @@ public class OneToMany<K, V> {
     }
 
     @Override
-    public boolean equals(Object other) {
-        return reflectionEquals(this, other);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        OneToMany<?, ?> oneToMany = (OneToMany<?, ?>) o;
+
+        return data.equals(oneToMany.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return data.hashCode();
     }
 
     @Override
