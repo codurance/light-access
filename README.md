@@ -3,7 +3,7 @@
 Light Access
 ============
 
-Light Access is a small library on top of [JDBC][1].
+Light Access is a small library on top of [JDBC][1], under the [Apache 2](https://www.apache.org/licenses/LICENSE-2.0) license. 
 
 # Who should use this library?
 
