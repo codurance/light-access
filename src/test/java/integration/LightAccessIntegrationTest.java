@@ -5,6 +5,7 @@ import com.codurance.lightaccess.executables.DDLCommand;
 import com.codurance.lightaccess.executables.SQLCommand;
 import com.codurance.lightaccess.executables.SQLQuery;
 import com.codurance.lightaccess.mapping.LAResultSet;
+import integration.dtos.Item;
 import integration.dtos.Product;
 import integration.dtos.ProductID;
 import org.h2.jdbcx.JdbcConnectionPool;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class LightAccessIntegrationTest {
 
     private static final String CREATE_PRODUCTS_TABLE = "CREATE TABLE products (id VARCHAR(255) PRIMARY KEY, name VARCHAR(255), date TIMESTAMP)";
+    private static final String CREATE_ITEMS_TABLE = "CREATE TABLE items (id BIGINT PRIMARY KEY, name VARCHAR(255))";
     private static final String CREATE_SEQUENCE_DDL = "CREATE SEQUENCE %s START WITH %s";
     private static final String DROP_ALL_OBJECTS = "DROP ALL OBJECTS";
 
@@ -33,12 +35,17 @@ public class LightAccessIntegrationTest {
     private static final String UPDATE_PRODUCT_NAME_SQL = "update products set name = ? where id = ?";
     private static final String SELECT_ALL_PRODUCTS_SQL = "select * from products";
     private static final String SELECT_PRODUCT_BY_ID_SQL = "select * from products where id = ?";
+    private static final String INSERT_ITEM_SQL = "insert into items (id, name) values (?, ?)";
+    private static final String SELECT_ITEM_BY_ID_SQL = "select id, name from items where id = ?";
+
 
     private static final LocalDate TODAY = LocalDate.of(2017, 07, 27);
     private static final LocalDate YESTERDAY = LocalDate.of(2017, 07, 26);
 
     private static Product PRODUCT_ONE = new Product(1, "Product 1", YESTERDAY);
     private static Product PRODUCT_TWO = new Product(2, "Product 2", TODAY);
+
+    private static Item SINGLE_ITEM = new Item(112345L, "9 Pound Hammer");
 
     private static LightAccess lightAccess;
     private static JdbcConnectionPool jdbcConnectionPool;
@@ -52,6 +59,7 @@ public class LightAccessIntegrationTest {
     @Before
     public void before_each_test() throws Exception {
         lightAccess.executeDDLCommand(createProductsTable());
+        lightAccess.executeDDLCommand(createItemsTable());
     }
 
     @After
@@ -82,8 +90,8 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     insert_records() {
-        lightAccess.executeCommand(insert(PRODUCT_ONE));
-        lightAccess.executeCommand(insert(PRODUCT_TWO));
+        lightAccess.executeCommand(insertProduct(PRODUCT_ONE));
+        lightAccess.executeCommand(insertProduct(PRODUCT_TWO));
 
         List<Product> products = lightAccess.executeQuery(retrieveAllProducts());
 
@@ -92,8 +100,8 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     retrieve_a_single_record_and_map_it_to_an_object() {
-        lightAccess.executeCommand(insert(PRODUCT_ONE));
-        lightAccess.executeCommand(insert(PRODUCT_TWO));
+        lightAccess.executeCommand(insertProduct(PRODUCT_ONE));
+        lightAccess.executeCommand(insertProduct(PRODUCT_TWO));
 
         Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id()));
 
@@ -102,7 +110,7 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     retrieve_an_empty_optional_when_not_record_is_found() {
-        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(insertProduct(PRODUCT_ONE));
 
         Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_TWO.id()));
 
@@ -111,8 +119,8 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     delete_a_record() {
-        lightAccess.executeCommand(insert(PRODUCT_ONE));
-        lightAccess.executeCommand(insert(PRODUCT_TWO));
+        lightAccess.executeCommand(insertProduct(PRODUCT_ONE));
+        lightAccess.executeCommand(insertProduct(PRODUCT_TWO));
 
         lightAccess.executeCommand(delete(PRODUCT_ONE));
 
@@ -122,7 +130,7 @@ public class LightAccessIntegrationTest {
 
     @Test public void
     update_a_record() {
-        lightAccess.executeCommand(insert(PRODUCT_ONE));
+        lightAccess.executeCommand(insertProduct(PRODUCT_ONE));
         lightAccess.executeCommand(updateProductName(1, "Another name"));
 
         Optional<Product> product = lightAccess.executeQuery(retrieveProductWithId(PRODUCT_ONE.id()));
@@ -152,6 +160,16 @@ public class LightAccessIntegrationTest {
         assertThat(secondId).isEqualTo(new ProductID(11));
     }
 
+    @Test public void
+    return_item_when_exists() {
+        lightAccess.executeCommand(insertItem(SINGLE_ITEM));
+
+        Optional<Item> item = lightAccess.executeQuery(conn -> conn.prepareStatement(SELECT_ITEM_BY_ID_SQL).withParam(SINGLE_ITEM.id)
+                .executeQuery().onlyResult(this::toItem));
+
+        assertThat(item.get()).isEqualTo(SINGLE_ITEM);
+    }
+
     private SQLCommand updateProductName(int id, String name) {
         return conn -> conn.prepareStatement(UPDATE_PRODUCT_NAME_SQL)
                             .withParam(name)
@@ -165,12 +183,19 @@ public class LightAccessIntegrationTest {
                             .executeUpdate();
     }
 
-    private SQLCommand insert(Product product) {
+    private SQLCommand insertProduct(Product product) {
         return conn -> conn.prepareStatement(INSERT_PRODUCT_SQL)
                             .withParam(product.id())
                             .withParam(product.name())
                             .withParam(product.date())
                             .executeUpdate();
+    }
+
+    private SQLCommand insertItem(Item item) {
+        return conn -> conn.prepareStatement(INSERT_ITEM_SQL)
+                .withParam(item.id)
+                .withParam(item.name)
+                .executeUpdate();
     }
 
     private SQLQuery<Optional<Product>> retrieveProductWithId(int id) {
@@ -196,6 +221,11 @@ public class LightAccessIntegrationTest {
                           laResultSet.getLocalDate(3));
     }
 
+    private Item toItem(LAResultSet laResultSet) {
+        return new Item(laResultSet.getLong(1),
+                laResultSet.getString(2));
+    }
+
     private DDLCommand createSequence(String sequenceName, String initialValue) {
         String id_sequence = format(CREATE_SEQUENCE_DDL, sequenceName, initialValue);
         return (conn) -> conn.statement(id_sequence).execute();
@@ -203,6 +233,10 @@ public class LightAccessIntegrationTest {
 
     private DDLCommand createProductsTable() {
         return (conn) -> conn.statement(CREATE_PRODUCTS_TABLE).execute();
+    }
+
+    private DDLCommand createItemsTable() {
+        return (conn) -> conn.statement(CREATE_ITEMS_TABLE).execute();
     }
 
     private DDLCommand dropAllObjects() {
