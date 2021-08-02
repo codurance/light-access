@@ -196,6 +196,21 @@ public class LAResultSetShould {
     }
 
     @Test public void
+    return_zero_when_long_field_is_null() throws SQLException {
+        // JDBC java.sql.ResultSet.getInt(int columnindex) returns 0 when field is null.
+        given(resultSet.getLong(1)).willReturn(0L);
+
+        assertThat(laResultSet.getLong(1)).isEqualTo(0);
+    }
+
+    @Test public void
+    return_long_when_int_field_has_value() throws SQLException {
+        given(resultSet.getLong(1)).willReturn(10L);
+
+        assertThat(laResultSet.getLong(1)).isEqualTo(10L);
+    }
+
+    @Test public void
     move_to_next_record() throws SQLException {
         laResultSet.nextRecord();
 

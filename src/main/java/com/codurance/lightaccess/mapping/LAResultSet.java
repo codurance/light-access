@@ -21,6 +21,10 @@ public class LAResultSet {
         return executeQuery(() -> resultSet.getInt(columnIndex));
     }
 
+    public Long getLong(int columnIndex) {
+        return executeQuery(() -> resultSet.getLong(columnIndex));
+    }
+
     public String getString(int columnIndex) {
         String stringValue = executeQuery(() -> resultSet.getString(columnIndex));
         return (stringValue != null) ? stringValue : "";

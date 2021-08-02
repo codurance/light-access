@@ -31,6 +31,10 @@ public class PreparedStatementBuilder {
         return withParam((paramIndex) -> execute(() -> preparedStatement.setDate(paramIndex, Date.valueOf(param))));
     }
 
+    public PreparedStatementBuilder withParam(Long param) {
+        return withParam((paramIndex) -> execute(() -> preparedStatement.setLong(paramIndex, param)));
+    }
+
     public void executeUpdate() {
         execute(() -> {
             preparedStatement.executeUpdate();
